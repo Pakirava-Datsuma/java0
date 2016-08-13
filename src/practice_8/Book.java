@@ -1,16 +1,42 @@
 package practice_8;
 
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.chart.XYChart;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by swanta on 17.07.16.
  */
 public class Book {
-    private final SimpleStringProperty title;
-    private final SimpleStringProperty author;
-    private final SimpleStringProperty subject;
-    private final IntegerProperty pages;
+    private final SimpleStringProperty title  = new SimpleStringProperty();
+    private final SimpleStringProperty author = new SimpleStringProperty();
+    private final SimpleStringProperty genre = new SimpleStringProperty();
+    private final IntegerProperty pages = new SimpleIntegerProperty();
+    private XYChart.Series<String, Number> realSeries;
+    private XYChart.Series<String, Number> planSeries;
+    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd");
+
+    public Book(String title, String author, String genre, int pagesCount) {
+        this.title.setValue(title);
+        this.author.setValue(author);
+        this.genre.setValue(genre);
+        this.pages.setValue(pagesCount);
+        setTodayReadPagesQuantity(0);
+    }
+
+    public void setTodayReadPagesQuantity(int i) {
+        Date date = new Date();
+        setReadPagesQuantity(new Date(date.getTime()), i);
+    }
+
+    private void setReadPagesQuantity(Date date, int pages) {
+        String dateString = dateFormat.format(date);
+        realSeries.getData().add(new XYChart.Data(dateString, pages));
+    }
 
     public String getAuthor() {
         return author.get();
@@ -24,16 +50,16 @@ public class Book {
         this.author.set(author);
     }
 
-    public String getSubject() {
-        return subject.get();
+    public String getGenre() {
+        return genre.get();
     }
 
-    public SimpleStringProperty subjectProperty() {
-        return subject;
+    public SimpleStringProperty genreProperty() {
+        return genre;
     }
 
-    public void setSubject(String subject) {
-        this.subject.set(subject);
+    public void setGenre(String genre) {
+        this.genre.set(genre);
     }
 
     public String getTitle() {
@@ -60,10 +86,8 @@ public class Book {
         this.pages.set(pages);
     }
 
-    public Book(SimpleStringProperty author, SimpleStringProperty subject, SimpleStringProperty title, IntegerProperty pages) {
-        this.author = author;
-        this.subject = subject;
-        this.title = title;
-        this.pages = pages;
+
+    public XYChart.Series<String, Number> getSeries() {
+        return realSeries;
     }
 }
