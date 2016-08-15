@@ -5,6 +5,8 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
@@ -25,6 +27,7 @@ import java.util.Random;
  */
 public class LibraryGUI extends Application {
     private Library library;
+    private Book selectedBook;
 
     @Override
     public void stop() throws Exception {
@@ -34,163 +37,136 @@ public class LibraryGUI extends Application {
 
     @Override
     public void init() throws Exception {
-        library = new Library(new File("library.lib"));
-        library.loadBooksFromFile();
+        library = new Library(new File("library.lib")) {
+            {
+                loadBooksFromFile();
+            }};
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        TabPane root = new TabPane();
-        root.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        Tab libraryTab = new Tab("MyLibrary");
-//        libraryTab.setText("MyLibrary");
 
-        Label tableTitle = new Label("MyBooks");
-        tableTitle.setFont(new Font(18));
-        TableView tableView = new TableView();
-        tableView.setMinSize(400, 300);
-        TableColumn titleColumn = new TableColumn("Title");
-        titleColumn.setMinWidth(200);
-        titleColumn.setCellValueFactory(new PropertyValueFactory<>("Title"));
+        Label tableTitle = new Label("MyBooks") {{
+                setFont(new Font(18));
+            }};
 
-        TableColumn authorColumn = new TableColumn("Author");
-        authorColumn.setMinWidth(100);
-        authorColumn.setCellValueFactory(new PropertyValueFactory<>("Author"));
+        TableColumn titleColumn = new TableColumn("Title") {{
+                setMinWidth(200);
+                setCellValueFactory(new PropertyValueFactory<>("Title"));
+            }};
 
-        TableColumn subjectColumn = new TableColumn("Genre");
-        subjectColumn.setMinWidth(50);
-        subjectColumn.setCellValueFactory(new PropertyValueFactory<>("Genre"));
+        TableColumn authorColumn = new TableColumn("Author") {{
+                setMinWidth(100);
+                setCellValueFactory(new PropertyValueFactory<>("Author"));
+            }};
 
-        TableColumn pagesColumn = new TableColumn("Pages");
-        pagesColumn.setMinWidth(50);
-        pagesColumn.setCellValueFactory(new PropertyValueFactory<>("Pages"));
+        TableColumn pagesColumn = new TableColumn("Pages") {{
+                setMinWidth(50);
+                setCellValueFactory(new PropertyValueFactory<>("Pages"));
+            }};
+        TableColumn subjectColumn = new TableColumn("Genre") {{
+                setMinWidth(50);
+                setCellValueFactory(new PropertyValueFactory<>("Genre"));
+            }};
+        TableView tableView = new TableView() {{
+                setMinSize(400, 300);
+                getColumns().addAll(titleColumn, authorColumn, subjectColumn, pagesColumn);
+                setItems(library.getBooks());
+            }};
 
-        tableView.getColumns().addAll(titleColumn, authorColumn,subjectColumn, pagesColumn);
-        tableView.setItems(library.getBooks());
-
-        VBox tableViewBox = new VBox(10);
-        tableViewBox.getChildren().addAll(tableTitle, tableView);
-//        tableViewBox.setPadding(new Insets(10));
+        VBox tableViewBox = new VBox(10) {{
+                getChildren().addAll(tableTitle, tableView);
+//              setPadding(new Insets(10));
+            }};
 
 //        ----------- start TextFields
-        TextField addAuthorField = new TextField();
-        addAuthorField.setPromptText("print author here");
-        TextField addSubjectField = new TextField();
-        addSubjectField.setPromptText("print subject here");
-        TextField addTitleField = new TextField();
-        addTitleField.setPromptText("print title here");
-        TextField addPagesField = new TextField();
-        addPagesField.setPromptText("print pages count here");
+        TextField addAuthorField = new TextField() {{
+            setPromptText("print author here");}};
+
+        TextField addSubjectField = new TextField() {{
+            setPromptText("print subject here");}};
+
+        TextField addTitleField = new TextField() {{
+            setPromptText("print title here");}};
+
+        TextField addPagesField = new TextField() {{
+            setPromptText("print pages count here");}};
 
 //        ------------end TextFields
 
-        Button tableAddButton = new Button("+");
-        tableAddButton.setOnAction( (ActionEvent e) -> {
-            library.addBook(addTitleField.getText(),
-                    addAuthorField.getText(),
-                    addSubjectField.getText(),
-                    Integer.parseInt(addPagesField.getText()));
-            addAuthorField.clear();
-            addPagesField.clear();
-            addTitleField.clear();
-            addSubjectField.clear();
-
-        });
-//        tableControls[i].setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//
-//            }
-//        });
-        Button tableRemoveButton = new Button("-");
-        tableRemoveButton.setOnAction( (ActionEvent e) -> {
-            library.getBooks().remove(tableView.getSelectionModel().getSelectedItem());
-        });
-
+        Button tableAddButton = new Button("+") {{
+                setOnAction((ActionEvent e) -> {
+                    if ( !(
+                            addAuthorField.getText().isEmpty() ||
+                            addPagesField.getText().isEmpty() ||
+                            addTitleField.getText().isEmpty() ||
+                            addSubjectField.getText().isEmpty())) {
+                        library.addBook(addTitleField.getText(),
+                                addAuthorField.getText(),
+                                addSubjectField.getText(),
+                                Integer.parseInt(addPagesField.getText()));
+                        addAuthorField.clear();
+                        addPagesField.clear();
+                        addTitleField.clear();
+                        addSubjectField.clear();
+                    }
+                });
+            }};
+        Button tableRemoveButton = new Button("-") {{
+                setOnAction((ActionEvent e) -> {
+                    library.getBooks().remove(tableView.getSelectionModel().getSelectedItem());
+                });
+            }};
         HBox tableButtonsBox = new HBox(10, tableAddButton, tableRemoveButton);
-
         VBox tableControlsBox = new VBox(10, addTitleField, addAuthorField, addSubjectField, addPagesField, tableButtonsBox);
-
-
         HBox libraryTabBox = new HBox(10, tableViewBox, tableControlsBox);
-
-        libraryTab.setContent(libraryTabBox);
-
+        Tab libraryTab = new Tab("MyLibrary") {{
+                setContent(libraryTabBox);
+            }};
         Axis xAxis = new CategoryAxis();
-        xAxis.setLabel("Period");
+                xAxis.setLabel("Period");
         Axis yAxis = new NumberAxis();
-        yAxis.setLabel("Quantity");
-        LineChart<String, Number> quantityChart = new LineChart<String, Number>(xAxis, yAxis);
-        quantityChart.setMinSize(200, 200);
+                yAxis.setLabel("Quantity");
         XYChart.Series<String, Number> actualSeries = new LineChart.Series<String, Number>();
+            actualSeries.setName("in fact reading");
         XYChart.Series<String, Number> planSeries = new LineChart.Series<String, Number>();
-        actualSeries.setName("in fact reading");
-        planSeries.setName("have to be read");
-        Date date = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd");
-        for (int i = 5; i > 0; i--) {
-            String dateString = dateFormat.format(new Date(date.getTime() - i*(1000*3600*24)));
-            actualSeries.getData().add(new XYChart.Data(dateString,new Random().nextInt(25)));
-            planSeries.getData().add(new XYChart.Data(dateString, 20));
-        }
-
-        TextField addPagesQuantity = new TextField();
-        Button addPagesQButton = new Button("+");
-        addPagesQButton.setOnAction( e -> {
-            boolean wasFound = false;
-            for (Object item :
-                    actualSeries.getData()) {
-                if (((XYChart.Data) item).getXValue().equals(dateFormat.format(date))) {
-                    Number previousNumber = ((XYChart.Data<String, Number>) item).getYValue();
-                    ((XYChart.Data<String, Number>) item).setYValue((int)previousNumber + Integer.parseInt(addPagesQuantity.getText()));
-                    break;
-                }
-//                if point not found then new point
-                actualSeries.getData().add(new XYChart.Data(dateFormat.format(date), 13));
-
-            }
-            addPagesQuantity.clear();
-        });
-
-        quantityChart.getData().addAll(actualSeries, planSeries);
-
-        TextField addTodayPagesQuantity = new TextField();
-        addTodayPagesQuantity.setPromptText("add new quantity");
-        Button addTodayPagesQuantityButton = new Button("Add");
-        addTodayPagesQuantityButton.setOnAction(e -> {
-            boolean wasFound = false;
-            for (Object item : actualSeries.getData()) {
-                if (((XYChart.Data)item).getXValue().equals(dateFormat.format(date))) {
-                    wasFound = true;
-                    Number previousNumber =((XYChart.Data<String, Number>) item).getYValue();
-                    ((XYChart.Data<String, Number>) item).setYValue((int)previousNumber + Integer.parseInt(addTodayPagesQuantity.getText()));
-                    break;
-                }
-            }
-
-            if (!wasFound) {
-                actualSeries.getData().add(new XYChart.Data(dateFormat.format(date), Integer.parseInt(addTodayPagesQuantity.getText())));
-                planSeries.getData().add(new XYChart.Data(dateFormat.format(date), 20));
-            }
+            planSeries.setName("have to be read");
+        LineChart<String, Number> quantityChart = new LineChart<String, Number>(xAxis, yAxis){{
+                setMinSize(200, 200);
+                getData().addAll(actualSeries, planSeries);
+            }};
+        TextField addTodayPagesQuantity = new TextField(){{setPromptText("add new quantity");}};
+        Button addTodayPagesQuantityButton = new Button("Add") {{
+                setOnAction(e -> {
+                    selectedBook.addTodayReadPagesQuantity(Integer.parseInt(addTodayPagesQuantity.getText()));
 //            addTodayPagesQuantity.clear();
-        });
-
+                });
+            }};
         HBox addTodayPagesQuantityGroup = new HBox(addTodayPagesQuantity, addTodayPagesQuantityButton);
         Pane progressBox = new VBox (quantityChart, addTodayPagesQuantityGroup);
 
-        Tab progressTab = new Tab("Progress", progressBox);
-        progressTab.setOnSelectionChanged(e -> {
-            if (progressTab.isSelected()) {
-                Book activeBook = (Book)library.getBooks().get(tableView.getSelectionModel().getFocusedIndex());
-                actualSeries = activeBook.getSeries();
-            }
-        });
-        progressTab.disableProperty().setValue(true);
-        root.getTabs().addAll(libraryTab, progressTab);
+        Tab progressTab = new Tab("Progress", progressBox) {{
+                setOnSelectionChanged(new EventHandler() {
+                    @Override
+                    public void handle(Event event) {
+                        if (isSelected()) {
+                            //applying selection must be done when item has been selected
+                            selectedBook = (Book)tableView.getSelectionModel().getSelectedItems().get(0);
+                            actualSeries.getData().setAll(selectedBook.getSeries().getData());
+                        }
+                    }
+                });
+                disableProperty().setValue(true);
+            }};
+        TabPane root = new TabPane() {{
+                setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+                getTabs().addAll(libraryTab, progressTab);
 //        root.minHeightProperty().set(300);
-        root.setMinSize(300, 500);
+                setMinSize(300, 500);
+            }};
 
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 }
+
