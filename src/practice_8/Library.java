@@ -1,7 +1,5 @@
 package practice_8;
 
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -12,7 +10,7 @@ import java.io.*;
  */
 public class Library {
     private ObservableList<Book> books = FXCollections.observableArrayList();
-    private BooksSerializer serializer = new BooksSerializer(books);
+    private BookList booksData = new BookList(books);
     private File libraryFile;
 
     public Library(File libraryFile) {
@@ -21,10 +19,10 @@ public class Library {
 
     public boolean loadBooksFromFile (){
         try (FileInputStream fis = new FileInputStream(libraryFile)) {
-            BooksSerializer newBooks;
+            BookList newBooks;
             ObjectInputStream ois = new ObjectInputStream(fis);
-            newBooks = (BooksSerializer) ois.readObject();
-            this.serializer = newBooks;
+            newBooks = (BookList) ois.readObject();
+            this.booksData = newBooks;
             return true;
         } catch (IOException e) {
             //"can't access file"
@@ -39,7 +37,7 @@ public class Library {
     public boolean saveBooksToFile () {
         try (FileOutputStream fis = new FileOutputStream(libraryFile)) {
             ObjectOutputStream ois = new ObjectOutputStream(fis);
-            ois.writeObject(this.serializer);
+            ois.writeObject(this.booksData);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -47,11 +45,13 @@ public class Library {
         return false;
     }
 
-    public ObservableList getBooks (){
+    public ObservableList getBooks(){
         return books;
     }
 
-    public boolean addBook(String title, String author, String genre, int pagesCount) {
-        return books.add(new Book(title, author, genre, pagesCount));
+    public void addBook(String title, String author, String genre, int pagesCount) {
+        Book newBook = new Book(title, author, genre, pagesCount);
+        books.add(newBook);
+        booksData.add(newBook.getData());
     }
 }

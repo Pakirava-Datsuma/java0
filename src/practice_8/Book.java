@@ -3,25 +3,73 @@ package practice_8;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
  * Created by swanta on 17.07.16.
  */
-public class Book {
-    private final SimpleStringProperty title  = new SimpleStringProperty();
-    private final SimpleStringProperty author = new SimpleStringProperty();
-    private final SimpleStringProperty genre = new SimpleStringProperty();
-    private final IntegerProperty pages = new SimpleIntegerProperty();
-    private XYChart.Series<String, Number> realSeries = new XYChart.Series<>();
-    private XYChart.Series<String, Number> planSeries = new XYChart.Series<>();
+public class Book{
+    private BookData data;
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd");
 
+    private final SimpleStringProperty title;
+    private final SimpleStringProperty author;
+    private final SimpleStringProperty genre;
+    private final IntegerProperty pages;
+
+    private ObservableList<XYChart.Data<String, Number>> realSeriesData = FXCollections.observableList(
+            new ArrayList<XYChart.Data<String, Number>>()) ;
+    private ObservableList<XYChart.Data<String, Number>> planSeriesData = FXCollections.observableList(
+            new ArrayList<XYChart.Data<String, Number>>());
+    private ListChangeListener<XYChart.Data<String, Number>> readPagesDataUpdater =
+            new ListChangeListener<XYChart.Data<String, Number>>() {
+                @Override
+                public void onChanged(Change<? extends XYChart.Data<String, Number>> c) {
+                    //it's easier to reset all series data of book then iterate each change
+                    data.setReadStatistics(realSeriesData);
+                }
+            };
+    private ListChangeListener<XYChart.Data<String, Number>> planSeriesUpdater =
+            new ListChangeListener<XYChart.Data<String, Number>>() {
+                @Override
+                public void onChanged(Change<? extends XYChart.Data<String, Number>> c) {
+                    //it's easier to reset all series data of book then iterate each change
+                    data.setReadStatistics(realSeriesData);
+                }
+            };
+
+    private Book () {
+        data = new BookData();
+        this.realSeriesData.addListener(planSeriesUpdater);
+        this.realSeriesData.addListener(readPagesDataUpdater);
+        this.title = new SimpleStringProperty() {{ addListener((observable, oldValue, newValue) -> {
+            data.setTitle(newValue);
+        });}};
+        this.author = new SimpleStringProperty() {{addListener((observable, oldValue, newValue) -> {
+            data.setAuthor(newValue);
+        });}};
+        this.genre = new SimpleStringProperty() {{addListener((observable, oldValue, newValue) -> {
+            data.setGenre(newValue);
+        });}};
+        this.pages = new SimpleIntegerProperty() {{addListener((observable, oldValue, newValue) -> {
+            data.setPages(newValue.intValue());
+        });}};
+
+    }
+    public Book (BookData data) {
+        this();
+        this.data = data;
+        this.realSeriesData.setAll(data.getReadStatistics());
+    }
     public Book(String title, String author, String genre, int pagesCount) {
+        this();
         this.title.setValue(title);
         this.author.setValue(author);
         this.genre.setValue(genre);
@@ -34,29 +82,25 @@ public class Book {
 
     public void setTodayReadPagesQuantity(int i) {
 //        Date date = new Date();
-        setReadPagesQuantity(new Date(), i);
+        addReadPagesQuantity(new Date(), i);
     }
 
-    private void setReadPagesQuantity(Date date, int pages) {
-        String dateString = dateFormat.format(date);
-        realSeries.getData().add(new XYChart.Data(dateString, pages));
-    }
-    public int getTodayReadPagesQuantity() {
-//        Date date = new Date();
-        return getReadPagesQuantity(new Date());
-    }
-
-    private int getReadPagesQuantity(Date date) {
-        for (Object item : realSeries.getData())
-            if (((XYChart.Data) item).getXValue().equals(dateFormat.format(date)))
-                return ((XYChart.Data<String, Number>) item).getYValue().intValue();
-        return 0;
-    }
+//    private void setReadPagesQuantity(Date date, int pages) {
+//        realSeriesData.add(date, pages);
+//    }
+//    public Number getTodayReadPagesQuantity() {
+////        Date date = new Date();
+//        return getReadPagesQuantity(new Date());
+//    }
+//
+//    private Number getReadPagesQuantity(Date date) {
+//        return realSeriesData.getPages(date);
+//    }
 
     public void addReadPagesQuantity(Date date, int pages) {
         String dateString = dateFormat.format(date);
         boolean wasFound = false;
-        for (Object item : realSeries.getData()) {
+        for (Object item : realSeriesData) {
             if (((XYChart.Data) item).getXValue().equals(dateFormat.format(date))) {
                 wasFound = true;
                 Number previousNumber = ((XYChart.Data<String, Number>) item).getYValue();
@@ -66,7 +110,7 @@ public class Book {
         }
 
         if (!wasFound) {
-            realSeries.getData().add(new XYChart.Data(dateFormat.format(date), pages));
+            realSeriesData.add(new XYChart.Data(dateFormat.format(date), pages));
         }
     }
     public String getAuthor() {
@@ -118,8 +162,11 @@ public class Book {
     }
 
 
-    public XYChart.Series<String, Number> getSeries() {
-        return realSeries;
+    public ObservableList<XYChart.Data<String, Number>> getSeriesData() {
+        return realSeriesData;
     }
 
+    public BookData getData() {
+        return data;
+    }
 }

@@ -2,17 +2,8 @@ package practice_8;
 
 import com.sun.istack.internal.NotNull;
 import javafx.application.Application;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
@@ -24,9 +15,6 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
 
 /**
  * Created by swanta on 17.07.16.
@@ -152,7 +140,7 @@ public class LibraryGUI extends Application {
                 setMinSize(200, 200);
                 getData().addAll(actualSeries, planSeries);
                 currentBook.addListener((observable, oldValue, newValue) -> {
-                    actualSeries.setData(newValue.getSeries().getData());
+                    actualSeries.setData(newValue.getSeriesData());
                 });
             }};
         TextField addTodayPagesQuantity = new TextField(){{setPromptText("add new quantity");}};
