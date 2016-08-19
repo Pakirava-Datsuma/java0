@@ -1,4 +1,4 @@
-package interfaceAbstractExample;
+package practice_4.interfaceAbstractExample;
 
 /**
  * Created by swanta on 12.06.16.

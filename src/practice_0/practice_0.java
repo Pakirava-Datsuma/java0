@@ -1,4 +1,4 @@
-package pra
+package practice_0;
 
 /**
  * Created by swanta on 18.05.16.

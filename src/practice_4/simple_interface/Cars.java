@@ -1,4 +1,4 @@
-package simple_interface;
+package practice_4.simple_interface;
 
 /**
  * Created by swanta on 12.06.16.
