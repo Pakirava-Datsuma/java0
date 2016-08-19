@@ -1,8 +1,14 @@
 package practice_8;
 
+import com.sun.istack.internal.NotNull;
 import javafx.application.Application;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -27,7 +33,15 @@ import java.util.Random;
  */
 public class LibraryGUI extends Application {
     private Library library;
-    private Book selectedBook;
+    private SimpleObjectProperty<Book> selectedBook = new SimpleObjectProperty<>();
+    @NotNull
+    private SimpleObjectProperty<Book> currentBook = new SimpleObjectProperty<Book>(){{
+        selectedBook.addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                setValue(newValue);
+            }
+        });
+    }};
 
     @Override
     public void stop() throws Exception {
@@ -72,6 +86,9 @@ public class LibraryGUI extends Application {
                 setMinSize(400, 300);
                 getColumns().addAll(titleColumn, authorColumn, subjectColumn, pagesColumn);
                 setItems(library.getBooks());
+                getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                    selectedBook.setValue((Book)newValue);
+                });
             }};
 
         VBox tableViewBox = new VBox(10) {{
@@ -134,11 +151,14 @@ public class LibraryGUI extends Application {
         LineChart<String, Number> quantityChart = new LineChart<String, Number>(xAxis, yAxis){{
                 setMinSize(200, 200);
                 getData().addAll(actualSeries, planSeries);
+                currentBook.addListener((observable, oldValue, newValue) -> {
+                    actualSeries.setData(newValue.getSeries().getData());
+                });
             }};
         TextField addTodayPagesQuantity = new TextField(){{setPromptText("add new quantity");}};
         Button addTodayPagesQuantityButton = new Button("Add") {{
                 setOnAction(e -> {
-                    selectedBook.addTodayReadPagesQuantity(Integer.parseInt(addTodayPagesQuantity.getText()));
+                    currentBook.getValue().addTodayReadPagesQuantity(Integer.parseInt(addTodayPagesQuantity.getText()));
 //            addTodayPagesQuantity.clear();
                 });
             }};
@@ -146,17 +166,10 @@ public class LibraryGUI extends Application {
         Pane progressBox = new VBox (quantityChart, addTodayPagesQuantityGroup);
 
         Tab progressTab = new Tab("Progress", progressBox) {{
-                setOnSelectionChanged(new EventHandler() {
-                    @Override
-                    public void handle(Event event) {
-                        if (isSelected()) {
-                            //applying selection must be done when item has been selected
-                            selectedBook = (Book)tableView.getSelectionModel().getSelectedItems().get(0);
-                            actualSeries.getData().setAll(selectedBook.getSeries().getData());
-                        }
-                    }
+                selectedBook.addListener((observable, oldValue, newValue) -> {
+                    disableProperty().setValue(newValue == null);
                 });
-                disableProperty().setValue(true);
+
             }};
         TabPane root = new TabPane() {{
                 setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
