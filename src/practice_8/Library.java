@@ -2,15 +2,16 @@ package practice_8;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.chart.XYChart;
 
 import java.io.*;
+import java.util.Collection;
 
 /**
  * Created by swanta on 13.08.16.
  */
 public class Library {
     private ObservableList<Book> books = FXCollections.observableArrayList();
-    private BookList booksData = new BookList(books);
     private File libraryFile;
 
     public Library(File libraryFile) {
@@ -22,7 +23,6 @@ public class Library {
             BookList newBooks;
             ObjectInputStream ois = new ObjectInputStream(fis);
             newBooks = (BookList) ois.readObject();
-            this.booksData = newBooks;
             return true;
         } catch (IOException e) {
             //"can't access file"
@@ -34,24 +34,13 @@ public class Library {
         return false;
     }
 
-    public boolean saveBooksToFile () {
-        try (FileOutputStream fis = new FileOutputStream(libraryFile)) {
-            ObjectOutputStream ois = new ObjectOutputStream(fis);
-            ois.writeObject(this.booksData);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     public ObservableList getBooks(){
         return books;
     }
 
-    public void addBook(String title, String author, String genre, int pagesCount) {
-        Book newBook = new Book(title, author, genre, pagesCount);
-        books.add(newBook);
-        booksData.add(newBook.getData());
+    public void addBook(Book book) {
+        books.add(book);
     }
+
+
 }
