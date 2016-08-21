@@ -166,7 +166,7 @@ public class LibraryGUI extends Application {
         TextField addTodayPagesQuantity = new TextField(){{setPromptText("add new quantity");}};
         Button addTodayPagesQuantityButton = new Button("Add") {{
                 setOnAction(e -> {
-                    todayReadPages.(Integer.parseInt(addTodayPagesQuantity.getText()));
+//                    todayReadPages.(Integer.parseInt(addTodayPagesQuantity.getText()));
 //                    currentBook.getValue().addTodayReadPagesQuantity(Integer.parseInt(addTodayPagesQuantity.getText()));
 //            addTodayPagesQuantity.clear();
                 });

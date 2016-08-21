@@ -1,4 +1,4 @@
-package practice_5;
+package practice_5.Set1;
 
 import java.util.*;
 

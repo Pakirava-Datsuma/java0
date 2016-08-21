@@ -1,4 +1,4 @@
-package practice_5;
+package practice_5.List;
 
 /**
  * Created by swanta on 22.06.16.
