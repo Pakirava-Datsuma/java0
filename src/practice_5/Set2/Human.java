@@ -45,7 +45,7 @@ public class Human {
     }
 
     enum CarModel {
-        AUDI, MERCEDES, BMW, CRYSLER, LOTUS, FERRARI;
+        AUDI, MERCEDES, BMW, CHRYSLER, LOTUS, FERRARI;
     }
 
     public static Set<Human> getSomeHumans(String[] names) {
