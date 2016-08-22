@@ -1,35 +1,62 @@
 package practice_8;
 
-import javafx.application.Application;
-
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 
 /**
  * Created by swanta on 13.08.16.
  */
 public class UIExampleApp {
+    static Library testLibrary = new Library();
 
     public static void main(String[] args) {
-/*
-        try (ObjectOutputStream oos = new ObjectOutputStream(System.out);)
-        {
+        test();
+//        Application.launch(LibraryGUI.class, args);
+    }
+
+    private static void test() {
+        //        testSerialize();
+        testWriteTestBooks();
+        testLoadBooks();
+        testShowBooks();
+
+    }
+
+    private static void testShowBooks() {
+        System.out.println("-------testShowBooks-----------");
+        for (Book book : testLibrary.getBooks()) {
+            System.out.println(book.toString());
+        }
+    }
+
+    public static void testSerialize() {
+        System.out.println("-------testSerialize-----------");
+        try (ObjectOutputStream oos = new ObjectOutputStream(System.out);) {
             oos.writeObject(
-                    new BookList(new HashSet() {
+                    new HashSet() {
                         {
                             new Book("title", "author", "genre", 321) {{
                                 addTodayReadPagesQuantity(12);
                             }};
                         }
-                    }));
+                    });
         } catch (IOException e) {
             e.printStackTrace();
         }
-*/
-        Application.launch(LibraryGUI.class, args);
+    }
+
+    public static void testWriteTestBooks() {
+        System.out.println("-------testWriteTestBooks-----------");
+        testLibrary.addBook("H.Potter", "J.Roulling", "fantasy", 321);
+        testLibrary.addBook("Diving into C++", "H.Deiteil, R.Deiteil", "study", 810);
+        testLibrary.saveBooksToFile();
+        System.out.println("test book set: " + (testLibrary.isFileLoaded() ? "written ok" : "write FAILED"));
+    }
+
+    private static void testLoadBooks() {
+        System.out.println("-------testLoadBooks-----------");
+        testLibrary.loadBooksFromFile();
+        System.out.println("test book set: " + (testLibrary.isFileLoaded() ? "loaded ok" : "load FAILED"));
     }
 }

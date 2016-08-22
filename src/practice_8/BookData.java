@@ -14,6 +14,18 @@ public class BookData implements Serializable {
     private String title;
     private String author;
     private String genre;
+
+    @Override
+    public String toString() {
+        return "BookData{" +
+                "title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", genre='" + genre + '\'' +
+                ", pages=" + pages +
+                ", readStatistics=" + readStatistics +
+                '}';
+    }
+
     private int pages;
 
     private ArrayList<Data> readStatistics = new ArrayList<>();

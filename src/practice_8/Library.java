@@ -4,14 +4,18 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by swanta on 13.08.16.
  */
 public class Library {
     private ObservableList<Book> books = FXCollections.observableArrayList();
-    private BookList booksData = new BookList(books);
-    private File libraryFile = new File("library.lib");
+    private List<Book> bookList = books;
+
+    private File libraryFile = new File("testLibrary.lib");
     private boolean isFileLoaded = false;
 
     public Library() {
@@ -21,11 +25,12 @@ public class Library {
     }
 
     public boolean loadBooksFromFile (){
+        isFileLoaded = false;
         try (FileInputStream fis = new FileInputStream(libraryFile)) {
-            BookList newBooks;
+            Collection<BookData> bookData = new ArrayList();
             ObjectInputStream ois = new ObjectInputStream(fis);
-            newBooks = (BookList) ois.readObject();
-            this.booksData = newBooks;
+            bookData = (ArrayList) ois.readObject();
+            this.books.setAll(Book.getBooks(bookData));
             isFileLoaded = true;
         } catch (IOException e) {
             //"can't access file"
@@ -34,33 +39,35 @@ public class Library {
             //"no books were saved earlier"
             e.printStackTrace();
         }
-        isFileLoaded = false;
         return isFileLoaded;
     }
 
     public boolean saveBooksToFile () {
+//        TODO: overwrite exists data
+        isFileLoaded = false;
         try (FileOutputStream fis = new FileOutputStream(libraryFile)) {
             ObjectOutputStream ois = new ObjectOutputStream(fis);
-            ois.writeObject(this.booksData);
+            Collection<BookData> bookData = Book.getBooksData(books);
+            ois.writeObject(bookData);
             isFileLoaded = true;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        isFileLoaded = false;
         return isFileLoaded;
     }
 
-    public ObservableList getBooks(){
+    public ObservableList<Book> getBooks(){
         return books;
     }
 
     public void addBook(String title, String author, String genre, int pagesCount) {
         Book newBook = new Book(title, author, genre, pagesCount);
         books.add(newBook);
-        booksData.add(newBook.getData());
     }
 
     public boolean isFileLoaded() {
         return isFileLoaded;
     }
+
+
 }

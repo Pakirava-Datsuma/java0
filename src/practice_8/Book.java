@@ -10,7 +10,9 @@ import javafx.scene.chart.XYChart;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by swanta on 17.07.16.
@@ -63,6 +65,12 @@ public class Book{
         });}};
 
     }
+
+    @Override
+    public String toString() {
+        return data.toString();
+    }
+
     public Book (BookData data) {
         this();
         this.data = data;
@@ -168,5 +176,20 @@ public class Book{
 
     public BookData getData() {
         return data;
+    }
+
+    public static Collection<Book> getBooks(Collection<BookData> bookData) {
+        Collection<Book> result = new ArrayList<Book>();
+        for (BookData data : bookData) {
+            result.add(new Book(data));
+        }
+        return result;
+    }
+    public static Collection<BookData> getBooksData(Collection<Book> books) {
+        Collection<BookData> result = new ArrayList<BookData>();
+        for (Book book : books) {
+            result.add(book.getData());
+        }
+        return result;
     }
 }
