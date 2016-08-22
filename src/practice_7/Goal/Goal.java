@@ -15,7 +15,7 @@ public class Goal implements Serializable{
     String description;
     Date dueDate;
     transient long daysLeft;
-    public static final String DATE_FORMAT = "DD.MM.YYYY";
+    public static final String DATE_FORMAT = "dd.MM.yyyy";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
     public void countDaysLeft(){

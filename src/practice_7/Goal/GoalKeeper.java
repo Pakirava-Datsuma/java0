@@ -31,13 +31,13 @@ public class GoalKeeper {
     public static void main(String[] args) {
         boolean exit = false;
         loadGoalsFromFiles();
-        try {
-            goals.add(new Goal("помыть посуду", "24.08.2016"));
-            goals.add(new Goal("получить сертификат", "06.09.2016"));
-            goals.add(new Goal("Java 1", "25.08.2016"));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            goals.add(new Goal("помыть посуду", "24.08.2016"));
+//            goals.add(new Goal("получить сертификат", "06.09.2016"));
+//            goals.add(new Goal("Java 1", "25.08.2016"));
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
 
         while (!exit) {
             System.out.println("\n1 - New Goal...");
