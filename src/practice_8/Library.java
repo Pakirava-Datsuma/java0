@@ -11,10 +11,13 @@ import java.io.*;
 public class Library {
     private ObservableList<Book> books = FXCollections.observableArrayList();
     private BookList booksData = new BookList(books);
-    private File libraryFile;
+    private File libraryFile = new File("library.lib");
+    private boolean isFileLoaded = false;
 
-    public Library(File libraryFile) {
-        this.libraryFile = libraryFile;
+    public Library() {
+        if (this.libraryFile.exists()) {
+            loadBooksFromFile();
+        }
     }
 
     public boolean loadBooksFromFile (){
@@ -23,7 +26,7 @@ public class Library {
             ObjectInputStream ois = new ObjectInputStream(fis);
             newBooks = (BookList) ois.readObject();
             this.booksData = newBooks;
-            return true;
+            isFileLoaded = true;
         } catch (IOException e) {
             //"can't access file"
             e.printStackTrace();
@@ -31,18 +34,20 @@ public class Library {
             //"no books were saved earlier"
             e.printStackTrace();
         }
-        return false;
+        isFileLoaded = false;
+        return isFileLoaded;
     }
 
     public boolean saveBooksToFile () {
         try (FileOutputStream fis = new FileOutputStream(libraryFile)) {
             ObjectOutputStream ois = new ObjectOutputStream(fis);
             ois.writeObject(this.booksData);
-            return true;
+            isFileLoaded = true;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
+        isFileLoaded = false;
+        return isFileLoaded;
     }
 
     public ObservableList getBooks(){
@@ -53,5 +58,9 @@ public class Library {
         Book newBook = new Book(title, author, genre, pagesCount);
         books.add(newBook);
         booksData.add(newBook.getData());
+    }
+
+    public boolean isFileLoaded() {
+        return isFileLoaded;
     }
 }

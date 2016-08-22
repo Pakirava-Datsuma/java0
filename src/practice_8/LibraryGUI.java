@@ -14,13 +14,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-import java.io.File;
-
 /**
  * Created by swanta on 17.07.16.
  */
 public class LibraryGUI extends Application {
     private Library library;
+    private boolean firstRun; //TODO: hello message at first run
+
     private SimpleObjectProperty<Book> selectedBook = new SimpleObjectProperty<>();
     @NotNull
     private SimpleObjectProperty<Book> currentBook = new SimpleObjectProperty<Book>(){{
@@ -39,10 +39,8 @@ public class LibraryGUI extends Application {
 
     @Override
     public void init() throws Exception {
-        library = new Library(new File("library.lib")) {
-            {
-                loadBooksFromFile();
-            }};
+        library = new Library();
+        firstRun = library.isFileLoaded();
     }
 
     @Override
