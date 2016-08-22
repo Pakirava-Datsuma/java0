@@ -85,7 +85,7 @@ public class BookData implements Serializable {
     }
 /*
 
-    public ArrayList<Data> getPlanSeriesData() {
+    public ArrayList<Data> getPlanSeries() {
         return planSeries;
     }
 
