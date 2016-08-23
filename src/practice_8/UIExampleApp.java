@@ -1,5 +1,7 @@
 package practice_8;
 
+import javafx.application.Application;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.HashSet;
@@ -11,8 +13,8 @@ public class UIExampleApp {
     static Library testLibrary = new Library();
 
     public static void main(String[] args) {
-        test();
-//        Application.launch(LibraryGUI.class, args);
+//        test();
+        Application.launch(LibraryGUI.class, args);
     }
 
     private static void test() {
