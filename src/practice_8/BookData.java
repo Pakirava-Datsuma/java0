@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
  * Created by swanta on 19.08.16.
  */
 public class BookData implements Serializable {
+    public static final Comparator<XYChart.Data<String, Number>>  dataComparatorOnlyDate = (d1, d2) -> d1.getXValue().compareTo(d2.getXValue());
     private String title;
     private String author;
     private String genre;
