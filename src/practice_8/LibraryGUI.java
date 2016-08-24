@@ -24,12 +24,7 @@ public class LibraryGUI extends Application {
     private SimpleObjectProperty<Book> selectedBook = new SimpleObjectProperty<>();
     @NotNull
     private SimpleObjectProperty<Book> currentBook = new SimpleObjectProperty<Book>(){{
-        selectedBook.addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                setValue(newValue);
-            }
-        });
-    }};
+        selectedBook.addListener((observable, oldValue, newValue) -> {if (newValue != null) setValue(newValue);});}};
 
     @Override
     public void stop() throws Exception {
