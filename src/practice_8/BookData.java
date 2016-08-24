@@ -6,6 +6,7 @@ import javafx.scene.chart.XYChart;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by swanta on 19.08.16.
@@ -22,14 +23,14 @@ public class BookData implements Serializable {
                 ", author='" + author + '\'' +
                 ", genre='" + genre + '\'' +
                 ", pages=" + pages +
-                ", readStatistics=" + readStatistics +
+                ", readStatistics=" + readStatistics.stream().map(Statistic::toString).collect(Collectors.joining(" | ")) +
                 '}';
     }
 
     private int pages;
 
-    private ArrayList<Data> readStatistics = new ArrayList<>();
-//    private ArrayList<Data> planSeries = new ArrayList<>();
+    private ArrayList<Statistic> readStatistics = new ArrayList<>();
+//    private ArrayList<Statistic> planSeries = new ArrayList<>();
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd");
 
 
@@ -60,10 +61,14 @@ public class BookData implements Serializable {
     }
 
     public Number getPages(Date date) {
-        for (Data data : readStatistics)
-            if (data.date.equals(dateFormat.format(date)))
-                return data.pages;
-        return 0;
+        return readStatistics.stream()
+                .filter(statistic -> statistic.date.equals(dateFormat.format(date)))
+                .mapToInt(statistic -> statistic.pages.intValue())
+                .sum();
+//        for (Statistic statistic : readStatistics)
+//            if (statistic.date.equals(dateFormat.format(date)))
+//                return statistic.pages;
+//        return 0;
     }
 
     public String getTitle() {
@@ -83,38 +88,48 @@ public class BookData implements Serializable {
     }
 
     public Collection<XYChart.Data<String, Number>> getReadStatistics() {
-        List<XYChart.Data<String, Number>> result = new LinkedList<>();
-        for (Data data : readStatistics) {
-            result.add(new XYChart.Data<>(data.date, data.pages));
-        }
-        return result;
+        return readStatistics.stream()
+                .map(statistic ->
+                        new XYChart.Data<String, Number>(statistic.date, statistic.pages))
+                .collect(Collectors.toCollection(ArrayList::new));
+//        List<XYChart.Data<String, Number>> result = new LinkedList<>();
+//        for (Statistic statistic : readStatistics) {
+//            result.add(new XYChart.Data<>(statistic.date, statistic.pages));
+//        }
+//        return result;
     }
 
     public void setReadStatistics(ObservableList<XYChart.Data<String, Number>> chartSeries) {
-        for (XYChart.Data<String, Number> chartData : chartSeries) {
-            this.readStatistics.add(new Data(chartData.getXValue(), chartData.getYValue()));
-        }
+        this.readStatistics = chartSeries.stream()
+                .map(bookData ->
+                        new Statistic(bookData.getXValue(), bookData.getYValue()))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 /*
 
-    public ArrayList<Data> getPlanSeries() {
+    public ArrayList<Statistic> getPlanSeries() {
         return planSeries;
     }
 
-    public void setPlanSeries(ObservableList<XYChart.Data<String, Number>> planSeries) {
+    public void setPlanSeries(ObservableList<XYChart.Statistic<String, Number>> planSeries) {
         this.planSeries = planSeries;
     }
 
 */
-    protected class Data implements Serializable{
+    protected class Statistic implements Serializable{
         public String date;
         public Number pages;
 
-        public Data(String date, Number pages) {
+        public Statistic(String date, Number pages) {
             this.date = date;
             this.pages = pages;
         }
+
+    @Override
+    public String toString() {
+        return String.format("(%s=%s)", date, pages.toString());
     }
+}
 
     public Collection<XYChart.Data<String, Number>> getRandomStatistics(float readPercentage) {
         return BookData.getRandomStatistics(this.pages, readPercentage);
@@ -128,7 +143,7 @@ public class BookData implements Serializable {
         int pagesLeft = (int) (readPercentage / 100 * pages) - MIN_PAGES_READING;
         long time = new Date().getTime();
         final long ONE_DAY_TIME = 24*3600*1000;
-        final long MIN_DATE_INTERVAL = ONE_DAY_TIME;
+        final long MIN_DATE_INTERVAL = 1*ONE_DAY_TIME;
         final long RANDOM_DATE_INTERVAL = 3 * ONE_DAY_TIME; //interval = rnd(RANDOM_DATE_INTERVAL) + MIN_DATE_INTERVAL
         Collection<XYChart.Data<String, Number>> randomDatas = new HashSet<>();
         while (pagesLeft > 0) {

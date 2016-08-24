@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 /**
@@ -75,7 +76,7 @@ public class Book{
         this.author.setValue(author);
         this.genre.setValue(genre);
         this.pages.setValue(pagesCount);
-        setTodayReadPagesQuantity(0);
+//        setTodayReadPagesQuantity(0);
     }
     public void addTodayReadPagesQuantity(int pages){
         addReadPagesQuantity(new Date(), pages);
@@ -101,17 +102,18 @@ public class Book{
     public void addReadPagesQuantity(Date date, int pages) {
         String dateString = dateFormat.format(date);
         boolean wasFound = false;
-        for (Object item : realSeriesData) {
-            if (((XYChart.Data) item).getXValue().equals(dateFormat.format(date))) {
-                wasFound = true;
-                Number previousNumber = ((XYChart.Data<String, Number>) item).getYValue();
-                ((XYChart.Data<String, Number>) item).setYValue((int) previousNumber + pages);
-                break;
-            }
-        }
-
-        if (!wasFound) {
-            realSeriesData.add(new XYChart.Data(dateFormat.format(date), pages));
+        XYChart.Data<String, Number> modifyingData;
+        try {
+            modifyingData = realSeriesData.stream()
+                .filter(data ->
+                        data.getXValue().equals(dateFormat.format(date)))
+                .findFirst()
+                .get();
+            pages += modifyingData.getYValue().intValue();
+            modifyingData.setYValue(pages);
+        }catch (NoSuchElementException e){
+            modifyingData = new XYChart.Data<>(dateFormat.format(date), pages);
+            realSeriesData.add(modifyingData);
         }
     }
     public String getAuthor() {
@@ -172,18 +174,12 @@ public class Book{
     }
 
     public static Collection<Book> getBooks(Collection<BookData> bookData) {
-        Collection<Book> result = new ArrayList<Book>();
-        for (BookData data : bookData) {
-            result.add(new Book(data));
-        }
-        return result;
+        return bookData.stream()
+                .map(Book::new)
+                .collect(Collectors.toList());
     }
     public static Collection<BookData> getBooksData(Collection<Book> books) {
-//        Collection<BookData> result = new ArrayList<BookData>();
-//        for (Book book : books) {
-//            result.add(book.getData());
-//        }
-        return books.stream().map(book -> book.getData()).collect(Collectors.toList());
+        return books.stream().map(Book::getData).collect(Collectors.toList());
     }
 
 //    public void setData(BookData data) {
