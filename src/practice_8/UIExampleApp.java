@@ -1,10 +1,15 @@
 package practice_8;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.scene.chart.XYChart;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created by swanta on 13.08.16.
@@ -13,17 +18,17 @@ public class UIExampleApp {
     private static Library testLibrary = new Library();
 
     public static void main(String[] args) {
-//        test();
-        Application.launch(LibraryGUI.class, args);
+        test();
+//        Application.launch(LibraryGUI.class, args);
     }
 
     private static void test() {
-        //        testSerialize();
-//        testLibrary.getBooks().clear();
-//        testAddTestBooks();
+        testLibrary.getBooks().clear();
+        testAddTestBooks();
+        testSerialize();
 //        testWriteBooks();
 //        testLoadBooks();
-        testShowBooks();
+//        testShowBooks();
 
     }
 
@@ -32,22 +37,27 @@ public class UIExampleApp {
         for (Book book : testLibrary.getBooks()) {
             System.out.println(book.toString());
         }
+        System.out.println("books listed");
     }
 
     public static void testSerialize() {
         System.out.println("-------testSerialize-----------");
-        try (ObjectOutputStream oos = new ObjectOutputStream(System.out);) {
-            oos.writeObject(
-                    new HashSet() {
-                        {
-                            new Book("title", "author", "genre", 321) {{
-                                addTodayReadPagesQuantity(12);
-                            }};
-                        }
-                    });
+        String result;
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("testSerialize"));) {
+            ArrayList<BookData> list = new ArrayList<>();
+            BookData bookData = new BookData("title", "author", "genre", 321) {{
+                List<XYChart.Data<String, Number>> list1 = new ArrayList<>();
+                list1.add(new XYChart.Data<>("test", 0));
+                setReadStatistics(FXCollections.observableList(list1));
+            }};
+            list.add(bookData);
+            oos.writeObject(new ArrayList(Book.getBooksData(testLibrary.getBooks())));
+            result = "ok";
         } catch (IOException e) {
             e.printStackTrace();
+            result = "FAULT";
         }
+        System.out.println("test: " + result);
     }
 
     public static void testAddTestBooks() {

@@ -9,10 +9,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -192,12 +189,12 @@ public class Book{
         return data;
     }
 
-    public static Collection<Book> getBooks(Collection<BookData> bookData) {
+    public static List<Book> getBooks(List<BookData> bookData) {
         return bookData.stream()
                 .map(Book::new)
                 .collect(Collectors.toList());
     }
-    public static Collection<BookData> getBooksData(Collection<Book> books) {
+    public static List<BookData> getBooksData(List<Book> books) {
         return books.stream().map(Book::getData).collect(Collectors.toList());
     }
 

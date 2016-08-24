@@ -14,33 +14,33 @@ import java.util.stream.Collectors;
  * Created by swanta on 13.08.16.
  */
 public class Library {
-    private final ObservableList<Book> books = FXCollections.observableArrayList();
-    private final List<BookData> booksData = new ArrayList<>();
-    private final ListChangeListener booksDataUpdater = new ListChangeListener<Book>() {
-        {
-            books.addListener(this);
-        }
-
-        @Override
-        public void onChanged(Change<? extends Book> changeList) {
-            while (changeList.next()) {
-                if (changeList.wasAdded()) {
-                    booksData.addAll(
-                            changeList.getAddedSubList().stream()
-                                    .map(Book::getData)
-                                    .collect(Collectors.toList()));
-                } else if (changeList.wasRemoved()) {
-                    booksData.removeAll(
-                            changeList.getRemoved().stream()
-                                    .map(Book::getData)
-                                    .collect(Collectors.toList())
-                    );
-                } else {
-                    throw new RuntimeException("unexpected changes in ObservableList of books in library");
-                }
-            }
-        }
-    };
+    private ObservableList<Book> books = FXCollections.observableArrayList();
+//    private ArrayList<BookData> booksData = new ArrayList<>();
+//    private ListChangeListener booksDataUpdater = new ListChangeListener<Book>() {
+//        {
+//            books.addListener(this);
+//        }
+//
+//        @Override
+//        public void onChanged(Change<? extends Book> changeList) {
+//            while (changeList.next()) {
+//                if (changeList.wasAdded()) {
+//                    booksData.addAll(
+//                            changeList.getAddedSubList().stream()
+//                                    .map(Book::getData)
+//                                    .collect(Collectors.toList()));
+//                } else if (changeList.wasRemoved()) {
+//                    booksData.removeAll(
+//                            changeList.getRemoved().stream()
+//                                    .map(Book::getData)
+//                                    .collect(Collectors.toList())
+//                    );
+//                } else {
+//                    throw new RuntimeException("unexpected changes in ObservableList of books in library");
+//                }
+//            }
+//        }
+//    };
 
 
     private File libraryFile = new File("testLibrary.lib");
@@ -55,9 +55,9 @@ public class Library {
     public boolean loadBooksFromFile (){
         isFileLoaded = false;
         try (FileInputStream fis = new FileInputStream(libraryFile)) {
-            List<BookData> bookData;// = new ArrayList<>();
+            ArrayList<BookData> bookData;// = new ArrayList<>();
             ObjectInputStream ois = new ObjectInputStream(fis);
-            bookData = (List<BookData>) ois.readObject();
+            bookData = (ArrayList<BookData>) ois.readObject();
             this.books.setAll(Book.getBooks(bookData));
             isFileLoaded = true;
         }  catch (ClassNotFoundException e) {
@@ -74,7 +74,7 @@ public class Library {
         isFileLoaded = false;
         try (FileOutputStream fis = new FileOutputStream(libraryFile, false)) { //file will be overwritten
             ObjectOutputStream ois = new ObjectOutputStream(fis);
-            ois.writeObject(this.booksData);
+            ois.writeObject(Book.getBooksData(books));
             isFileLoaded = true;
         } catch (IOException e) {
             e.printStackTrace();
