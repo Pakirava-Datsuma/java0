@@ -17,7 +17,7 @@ public class WorkLists {
     public boolean hasNoPatients () {
         for (DoctorWorkList list :
                 workList) {
-            if (list.size() > 0) {
+            if (list.getPatients().size() > 0) {
                 return false;
             }
             }

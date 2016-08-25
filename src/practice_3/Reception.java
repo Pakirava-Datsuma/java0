@@ -1,6 +1,8 @@
 package practice_3;
 
+import javax.print.Doc;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -9,21 +11,25 @@ import java.util.Set;
 public class Reception {
     public Set <DoctorWorkList> workLists = new HashSet<>();
     private Set <Doctor> doctors = new HashSet<>();
-    private int countDoctor = 0;
+//    private int countDoctor = 0;
 
     public void writeIn (Human human) {
-        if (countDoctor > 0) {
-            search:
-            for (DoctorWorkList workList :
-                    workLists) {
-
-                if (workList.add(human)) break search;
-                human.soutStatus("is crying!");
-                human.goHome("this hospital haven't enough doctors! Hire someone!");
-            }
+        DoctorWorkList workList = getFreeWorkList();
+        if (workList == null) {
+            human.goHome("this hospital haven't enough doctors! Hire someone! Man is crying :(");
         } else {
-            human.goHome("this hospital have not ANY doctors left!");
+            workList.add(human);
         }
+    }
+
+    private DoctorWorkList getFreeWorkList() {
+        if (isFull()) hireNewDoctor();
+        for (DoctorWorkList workList : workLists) {
+            if (!workList.isFull()) {
+                return workList;
+            }
+        }
+        return null;
     }
 
     public void writeOut (Human human) {
@@ -33,48 +39,55 @@ public class Reception {
                 human.goHome();
                 break search;
             }else {
-                human.soutStatus("can't be found in this hospital! " +
-                        "You are bad programmer!");
-                human.goHome(); //anyway:)
+                human.goHome(" he(she) can't be found in this hospital! " +
+                        "You are bad programmer!"); // anyway :)
             }
     }
 
     public void addDoctor(Doctor doctor) {
         doctors.add(doctor);
         workLists.add(new DoctorWorkList(doctor));
-        countDoctor++;
-        doctor.soutStatus("* is ready for job as doctor#"+countDoctor);
+//        countDoctor++;
+        doctor.soutStatus("* added");// as doctor#");//+countDoctor);
     }
 
     public boolean isFull() {
-        if (countDoctor == 0) return true;
-        for (DoctorWorkList list:
+        for (DoctorWorkList workList:
              workLists) {
-            if (!list.isFull()) return false;
+            if (!workList.isFull()) return false;
         }
         return true;
     }
 
     public Doctor getSomeDoctor(Human human) {
-        Doctor doctor;
-        if (doctors.isEmpty()) {
-            soutStatus("doctor not found.");
-            return null;
-        }
-        doctor = doctors.iterator().next();
-        doctor.soutStatus("checking " + human.getName());
-        return doctor;
+        //public wrapper for getFreeDoctor()
+        //TODO: replace with getFreeDoctor()
+        return getFreeDoctor();
     }
+
+    private Doctor getFreeDoctor() {
+        return getFreeWorkList().doctor;
+    }
+
 
     public Doctor getSomeDoctor() {
         Doctor doctor;
-        if (doctors.isEmpty()) {
-            soutStatus("doctor not found.");
-            return null;
+        try {
+            doctor = doctors.iterator().next();
         }
-        doctor = doctors.iterator().next();
-        soutStatus("doctor found.");
-        doctor.soutStatus("is ready.");
+        catch (NoSuchElementException e) {
+            soutStatus("\n...not enough doctors! need to hire one.");
+            doctor = hireNewDoctor();
+        }
+//        soutStatus("doctor found.");
+//        doctor.soutStatus("is ready.");
+        return doctor;
+    }
+
+    private Doctor hireNewDoctor() {
+        Doctor doctor = Doctor.getHealthyDoctor();
+        doctor.soutStatus("* hired");
+        addDoctor(doctor);
         return doctor;
     }
 
@@ -85,16 +98,16 @@ public class Reception {
     public Human healAtLeastOne() {
         while (getPatientsCount() > 0) {
             lists:
-            for (DoctorWorkList list:
+            for (DoctorWorkList workList:
                     workLists) {
-                Doctor doctor = list.doctor;
-                if (list.size() > 0) {
+                Doctor doctor = workList.doctor;
+                if (workList.getPatients().size() > 0) {
                     patients:
                     for (Human patient :
-                            list.getPatients()) {
+                            workList.getPatients()) {
                         if (!doctor.heal(patient))
                         if (!doctor.isFilingGood()) {
-                            hospitalizeDoctor(list);
+                            hospitalizeDoctor(workList);
                             continue lists;
                         }
                         if (!doctor.isNeedHeal(patient)) {
@@ -107,38 +120,42 @@ public class Reception {
         return null;
     }
 
-    private void hospitalizeDoctor(DoctorWorkList list) {
-        Doctor doctor = list.doctor;
-        doctor.soutStatus("hospitalizing...");
-        removeDoctor(list);
+    private void hospitalizeDoctor(DoctorWorkList workList) {
+        Doctor doctor = workList.doctor;
+        doctor.soutStatus("* is hospitalizing...");
+        removeDoctor(workList);
         writeIn(doctor);
-        doctor.soutStatus("hospitalized.");
+//        doctor.soutStatus("hospitalized.");
     }
 
-    private void removeDoctor(DoctorWorkList list) {
-        countDoctor--;
-        if (doctors.remove(list.doctor) && workLists.remove(list)) {
-            list.doctor.soutStatus("gone from reception.");
-        } else {
-            list.doctor.soutStatus("STILL ON RECEPTION");
-        }
+    private void removeDoctor(DoctorWorkList workList) {
+//        countDoctor--;
+        Doctor doctor = workList.doctor;
+        doctors.remove(doctor);
+        doctor.soutStatus("* dressed out his bage.");
+        workLists.remove(workList);
+        soutStatus("moving patients...");
         patients:
         for (Human patient:
-             list.getPatients()) {
-            patient.soutStatus("moving to another doctor...");
-            writeOut(patient);
-            patient.soutStatus("writed out from reception");
+             workList.getPatients()) {
+//            patient.soutStatus("* moving to another doctor...");
+//            writeOut(patient);
+//            patient.soutStatus("* writed out from reception");
             writeIn(patient);
-            patient.soutStatus("writed in on reception");
+//            patient.soutStatus("* writed in on reception");
         }
     }
 
     public int getPatientsCount() {
         int count = 0;
-        for (DoctorWorkList list:
+        for (DoctorWorkList workList:
              workLists) {
-            count += list.size();
+            count += workList.getPatients().size();
         }
         return count;
+    }
+
+    public int getDoctorsCount() {
+        return doctors.size();
     }
 }

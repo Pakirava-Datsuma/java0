@@ -22,12 +22,12 @@ public class Hospital {
                 } else if (doctor.isNeedHeal(human)) {
                     doctor.heal(human);
                 } else {
-                    human.goHome("this human is not ill");
+                    human.goHome(" this human is not ill");
                     isReady = true;
                 }
             }
         } else {
-            human.goHome("no doctors available");
+            human.goHome(" no doctors available");
         }
     }
 
@@ -65,17 +65,17 @@ public class Hospital {
     }
 
     public boolean hasDoctors() {
-        return reception.getSomeDoctor() != null;
+        return reception.getDoctorsCount() > 0;
     }
 
     public void soutStatus() {
         System.out.println("\nsummary : " + reception.workLists.size()+ " doctors:");
-        for (DoctorWorkList list :
+        for (DoctorWorkList workList :
                 reception.workLists) {
-            System.out.println("dr. "+list.doctor.getName() + " patients:");
+            System.out.println(workList.doctor.getNameAndHealth() + " patients:");
             for (Human patient :
-                    list.getPatients()) {
-                System.out.println("   "+patient.getName());
+                    workList.getPatients()) {
+                System.out.println("   "+patient.getNameAndHealth());
             }
         }
     }

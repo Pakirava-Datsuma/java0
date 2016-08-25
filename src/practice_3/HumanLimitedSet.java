@@ -8,6 +8,12 @@ import java.util.HashSet;
 public class HumanLimitedSet extends HashSet<Human> {
     protected int patientsMaxCount = 0;
 
+    public HumanLimitedSet(int limit){
+        patientsMaxCount = limit;
+    }
+
+    // hide constructor without arguments
+    private HumanLimitedSet(){}
     @Override
     public boolean add(Human human) {
         boolean result = false;
@@ -28,7 +34,7 @@ public class HumanLimitedSet extends HashSet<Human> {
     }
 
     public boolean isFull() {
-        boolean result = !(patientsMaxCount < size());
+        boolean result = patientsMaxCount <= size();
         return result;
     }
 
