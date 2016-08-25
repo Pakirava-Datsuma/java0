@@ -15,7 +15,8 @@ public class Reception {
 
     public void writeIn (Human human) {
         DoctorWorkList workList = getFreeWorkList();
-        if (workList == null) {
+        if (workList != null) {
+            //this method shouldn't been called from here.
             human.goHome("this hospital haven't enough doctors! Hire someone! Man is crying :(");
         } else {
             workList.add(human);
@@ -42,7 +43,7 @@ public class Reception {
         doctors.add(doctor);
         workLists.add(new DoctorWorkList(doctor));
 //        countDoctor++;
-        doctor.soutStatus("* added");// as doctor#");//+countDoctor);
+        doctor.soutStatus(" added");// as doctor#");//+countDoctor);
     }
 
     public boolean isFull() {

@@ -22,7 +22,7 @@ public class Doctor extends Human {
         Random random = new Random();
         health = random.nextInt(40) + 60; // usually doctor is more healthy than human
         this.level = random.nextInt(LEVEL_MAX - LEVEL_MIN) + LEVEL_MIN;
-        soutStatus("created: " + this.toString());
+        System.out.println("new doctor: " + this.toString());
     }
 
     public void heal (Human human) {
@@ -46,10 +46,9 @@ public class Doctor extends Human {
     }
 
     public boolean isNeedHospitalization (Human human) {
-        boolean result = (human.getHealth() < HEALTH_NEEDS_HEAL);
-        if (result) soutDiagnose(human, "needs hospitalization");
+        //        if (result) soutDiagnose(human, "needs hospitalization");
 //        else soutDiagnose(human, "doesn't need hospitalization");
-        return result;
+        return (human.getHealth() < HEALTH_NEEDS_HEAL);
     }
 
     private void soutDiagnose(Human human, String diagnose) {
@@ -85,8 +84,7 @@ public class Doctor extends Human {
     }
 
     public boolean isFilingGood() {
-        if (!(isDead(this) || isNeedHospitalization(this))) return true;
-        else return false;
+        return isNeedHospitalization(this);
     }
 
     @Override
