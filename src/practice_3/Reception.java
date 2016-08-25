@@ -24,12 +24,18 @@ public class Reception {
 
     private DoctorWorkList getFreeWorkList() {
         if (isFull()) hireNewDoctor();
-        for (DoctorWorkList workList : workLists) {
-            if (!workList.isFull()) {
-                return workList;
-            }
+//        for (DoctorWorkList workList : workLists) {
+//            if (!workList.isFull()) {
+//                return workList;
+//            }
+//        }
+        try {
+            return workLists.stream()
+                    .min((l1, l2) -> l1.getFreeSpace() - l2.getFreeSpace())
+                    .get();
+        } catch (NoSuchElementException e) {
+            return null;
         }
-        return null;
     }
 
     public void writeOut (Human human) {

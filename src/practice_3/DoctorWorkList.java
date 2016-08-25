@@ -55,4 +55,8 @@ public class DoctorWorkList {
             return null;
         }
     }
+
+    public int getFreeSpace() {
+        return patients.patientsMaxCount - patients.size();
+    }
 }
