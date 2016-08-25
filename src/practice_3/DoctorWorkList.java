@@ -27,10 +27,10 @@ public class DoctorWorkList {
 
     public boolean remove(Object human) {
         boolean result = (patients.remove(human));
-        if (result) {
-            ((Human)human).soutStatus("have been removed from worklist of doctor "
-                    + doctor.getNameAndHealth());
-        }
+//        if (result) {
+//            ((Human)human).soutStatus("have been removed from worklist of doctor "
+//                    + doctor.getNameAndHealth());
+//        }
         return result;
     }
 

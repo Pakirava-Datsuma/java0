@@ -61,6 +61,12 @@ public class Hospital {
             Human patient = workList.getFirstPatient();
             if (healPatient(patient, doctor)) {
                 reception.writeOut(patient);
+                if (doctor.isDead(patient)) {
+                    morgue.writeIn(patient);
+                }
+                else {
+                    patient.goHome("he(she) feel good");
+                }
             }
             else {
                 doctor.soutStatus("feels BAD and CAN'T work more");
@@ -76,13 +82,13 @@ public class Hospital {
 //        doctor.soutStatus("hospitalized.");
     }
 
-    // true if patient is health
+    // true if patient is health (or dead)
     // false if doctor is filing bad
     // if both (1) and (2)
     //    it's important to hospitalize doctor
     //    and let another doctor check the patient
     public boolean healPatient(Human patient, Doctor doctor) {
-        while (doctor.isFilingGood() && doctor.isNeedHeal(patient)) {
+        while (doctor.isFilingGood() && doctor.isNeedHeal(patient) && !doctor.isDead(patient)) {
             doctor.heal(patient);
         };
         return doctor.isFilingGood();

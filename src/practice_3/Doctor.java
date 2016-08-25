@@ -27,7 +27,7 @@ public class Doctor extends Human {
 
     public void heal (Human human) {
         Random random = new Random();
-        soutStatus("are going to heal " + human.getNameAndHealth() + ".");
+        soutStatus("* are going to heal " + human.getName() + ".");
         human.changeHealthBy(random.nextInt(35) - 10);
 //        human.soutStatus("have heal " + human.getNameAndHealth() +".");
         if (human != this) trySelfDamage();
@@ -39,7 +39,7 @@ public class Doctor extends Human {
         boolean damaged = (random.nextInt(level+1) == 0);
         if (damaged) {
             changeHealthBy(-OPERATING_SELF_DAMAGE);
-            soutStatus("has been damaged.");
+//            soutStatus("has been damaged.");
         }
 //        else soutStatus("have done operation successful.");
         return damaged;

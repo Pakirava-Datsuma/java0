@@ -33,15 +33,9 @@ public class Reception {
     }
 
     public void writeOut (Human human) {
-        search: for (DoctorWorkList workList:
+        for (DoctorWorkList workList:
                 workLists)
-            if (workList.remove(human)) {
-                human.goHome();
-                break search;
-            }else {
-                human.goHome(" he(she) can't be found in this hospital! " +
-                        "You are bad programmer!"); // anyway :)
-            }
+           workList.remove(human);
     }
 
     public void addDoctor(Doctor doctor) {

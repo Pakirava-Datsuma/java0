@@ -15,10 +15,10 @@ public class Morgue {
         if (bodiesCount < BODIES_COUNT_MAX ) {
             if (bodies.add(human)) {
                 bodiesCount++;
-                human.soutStatus("lays in morgue cabin #" + bodiesCount);
+                human.soutStatus("* lays in morgue cabin #" + bodiesCount);
             }
         } else {
-            human.soutStatus("will be digged in under the ground " +
+            human.soutStatus("* will be digged in under the ground " +
                     "because the morgue hasen't enough space. " +
                     "It's a very rare case for this program. " +
                     "May be the programmer is coursed.");
