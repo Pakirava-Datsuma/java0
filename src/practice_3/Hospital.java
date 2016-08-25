@@ -56,8 +56,36 @@ public class Hospital {
 
     public void healAll() {
         while (!isEmptyOfPatients()) {
-            reception.writeOut(reception.healAtLeastOne());
+            DoctorWorkList workList = reception.getWorkListWithPatients();
+            Doctor doctor = workList.getDoctor();
+            Human patient = workList.getFirstPatient();
+            if (healPatient(patient, doctor)) {
+                reception.writeOut(patient);
+            }
+            else {
+                doctor.soutStatus("feels BAD and CAN'T work more");
+                hospitalizeDoctor(doctor);
+            }
         }
+    }
+
+    private void hospitalizeDoctor(Doctor doctor) {
+        doctor.soutStatus("* is hospitalizing...");
+        reception.removeDoctor(doctor);
+        reception.writeIn(doctor);
+//        doctor.soutStatus("hospitalized.");
+    }
+
+    // true if patient is health
+    // false if doctor is filing bad
+    // if both (1) and (2)
+    //    it's important to hospitalize doctor
+    //    and let another doctor check the patient
+    public boolean healPatient(Human patient, Doctor doctor) {
+        while (doctor.isFilingGood() && doctor.isNeedHeal(patient)) {
+            doctor.heal(patient);
+        };
+        return doctor.isFilingGood();
     }
 
     private boolean isEmptyOfPatients() {

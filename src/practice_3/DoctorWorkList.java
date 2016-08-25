@@ -1,6 +1,7 @@
 package practice_3;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 /**
@@ -39,5 +40,19 @@ public class DoctorWorkList {
 
     public boolean isFull() {
         return patients.isFull();
+    }
+
+    public Doctor getDoctor() {
+        return doctor;
+    }
+
+    public Human getFirstPatient() {
+        try {
+            return patients.stream()
+                    .findFirst()
+                    .get();
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 }

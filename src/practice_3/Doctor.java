@@ -25,12 +25,13 @@ public class Doctor extends Human {
         soutStatus("created: " + this.toString());
     }
 
-    public boolean heal (Human human) {
+    public void heal (Human human) {
         Random random = new Random();
         soutStatus("are going to heal " + human.getNameAndHealth() + ".");
         human.changeHealthBy(random.nextInt(35) - 10);
 //        human.soutStatus("have heal " + human.getNameAndHealth() +".");
-        return human == this || !trySelfDamage();
+        if (human != this) trySelfDamage();
+        if (!isFilingGood()) soutStatus("feels BAD and CAN'T work more");
     }
 
     private boolean trySelfDamage() {
@@ -84,12 +85,8 @@ public class Doctor extends Human {
     }
 
     public boolean isFilingGood() {
-        if (isDead(this) || isNeedHospitalization(this)) {
-            soutStatus("feels BAD and CAN'T work more");
-            return false;
-        }
-        soutStatus("feels good and want work more");
-        return true;
+        if (!(isDead(this) || isNeedHospitalization(this))) return true;
+        else return false;
     }
 
     @Override

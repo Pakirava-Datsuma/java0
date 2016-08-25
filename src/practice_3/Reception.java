@@ -95,55 +95,14 @@ public class Reception {
         System.out.println("RECEPTION: "+status);
     }
 
-    public Human healAtLeastOne() {
-        while (getPatientsCount() > 0) {
-            lists:
-            for (DoctorWorkList workList:
-                    workLists) {
-                Doctor doctor = workList.doctor;
-                if (workList.getPatients().size() > 0) {
-                    patients:
-                    for (Human patient :
-                            workList.getPatients()) {
-                        if (!doctor.heal(patient))
-                        if (!doctor.isFilingGood()) {
-                            hospitalizeDoctor(workList);
-                            continue lists;
-                        }
-                        if (!doctor.isNeedHeal(patient)) {
-                            return patient;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
 
-    private void hospitalizeDoctor(DoctorWorkList workList) {
-        Doctor doctor = workList.doctor;
-        doctor.soutStatus("* is hospitalizing...");
-        removeDoctor(workList);
-        writeIn(doctor);
-//        doctor.soutStatus("hospitalized.");
-    }
-
-    private void removeDoctor(DoctorWorkList workList) {
-//        countDoctor--;
-        Doctor doctor = workList.doctor;
-        doctors.remove(doctor);
+    public void removeDoctor(Doctor doctor) {
+        DoctorWorkList workList = getWorkList(doctor);
         doctor.soutStatus("* dressed out his bage.");
+        doctors.remove(doctor);
         workLists.remove(workList);
         soutStatus("moving patients...");
-        patients:
-        for (Human patient:
-             workList.getPatients()) {
-//            patient.soutStatus("* moving to another doctor...");
-//            writeOut(patient);
-//            patient.soutStatus("* writed out from reception");
-            writeIn(patient);
-//            patient.soutStatus("* writed in on reception");
-        }
+        workList.getPatients().forEach(this::writeIn);
     }
 
     public int getPatientsCount() {
@@ -157,5 +116,28 @@ public class Reception {
 
     public int getDoctorsCount() {
         return doctors.size();
+    }
+
+    public DoctorWorkList getWorkListWithPatients() {
+        try {
+            return workLists.stream()
+                    .filter(workList -> workList.getPatients().size() > 0)
+                    .findFirst()
+                    .get();
+        } catch (NoSuchElementException e) {
+            return null;
+        }
+    }
+
+    public DoctorWorkList getWorkList(Doctor doctor) {
+        try {
+            return workLists.stream()
+                    .filter(workList ->
+                            workList.doctor == doctor)
+                    .findFirst()
+                    .get();
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 }
