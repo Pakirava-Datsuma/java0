@@ -48,6 +48,14 @@ public class Hospital {
             DoctorWorkList workList = reception.getWorkListWithPatients();
             Doctor doctor = workList.getDoctor();
             Human patient = workList.getFirstPatient();
+            /*
+            Reception shall not check if patient needs healing.
+            Reception only managing contents of worklists
+                and collection of doctors.
+            So technical specification has a lot of mistakes and misunderstoods.
+            And this code reflects missing of effective TS in quality of code.
+            So I'm sorry for all this spaghetti :)
+             */
             if (healPatient(patient, doctor)) { // curing ended
                 reception.writeOut(patient);
                 if (doctor.isDead(patient)) { // patient is dead
