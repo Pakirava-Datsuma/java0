@@ -20,7 +20,7 @@ public class DoctorWorkList {
         boolean result = (patients.add(human));
         if (result) {
             human.soutStatus("have been written in worklist of doctor "
-                    + doctor.getNameAndHealth());
+                    + doctor.getName());
         }
         return result;
     }

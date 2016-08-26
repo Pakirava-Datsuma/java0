@@ -8,7 +8,7 @@ import java.util.Random;
 public class Doctor extends Human {
     public static final int LEVEL_MAX = 5;
     public static final int LEVEL_MIN = 1;
-    public static final int OPERATING_SELF_DAMAGE = 10;
+    public static final int OPERATING_SELF_DAMAGE = 20;
     public final int level;
 
 //    public Doctor(String firstName, String lastName, char gender, Date dateOfBirth, int health, int level) {
@@ -31,12 +31,12 @@ public class Doctor extends Human {
         human.changeHealthBy(random.nextInt(35) - 10);
 //        human.soutStatus("have heal " + human.getNameAndHealth() +".");
         if (human != this) trySelfDamage();
-        if (!isFilingGood()) soutStatus("feels BAD and CAN'T work more");
+//        if (!isFilingGood()) soutStatus("feels BAD and CAN'T work more");
     }
 
     private boolean trySelfDamage() {
         Random random = new Random();
-        boolean damaged = (random.nextInt(level+1) == 0);
+        boolean damaged = (random.nextInt(level+1) == 0); // doctors 0 level should damage himself only 1/2 times
         if (damaged) {
             changeHealthBy(-OPERATING_SELF_DAMAGE);
 //            soutStatus("has been damaged.");
@@ -84,7 +84,10 @@ public class Doctor extends Human {
     }
 
     public boolean isFilingGood() {
-        return isNeedHospitalization(this);
+        while (isNeedHeal(this) && !isNeedHospitalization(this)) {
+                this.heal(this);
+        }
+        return !isNeedHospitalization(this);
     }
 
     @Override

@@ -15,7 +15,7 @@ public class Reception {
 
     public void writeIn (Human human) {
         DoctorWorkList workList = getFreeWorkList();
-        if (workList != null) {
+        if (workList == null) {
             //this method shouldn't been called from here.
             human.goHome("this hospital haven't enough doctors! Hire someone! Man is crying :(");
         } else {
@@ -93,11 +93,14 @@ public class Reception {
 
     public void removeDoctor(Doctor doctor) {
         DoctorWorkList workList = getWorkList(doctor);
-        doctor.soutStatus("* dressed out his bage.");
-        doctors.remove(doctor);
-        workLists.remove(workList);
-        soutStatus("moving patients...");
-        workList.getPatients().forEach(this::writeIn);
+        if (doctors.remove(doctor)) {
+            doctor.soutStatus("* dressed out his bage.");
+        }
+        if (workList != null) {
+            workLists.remove(workList);
+            soutStatus("moving patients...");
+            workList.getPatients().forEach(this::writeIn);
+        }
     }
 
     public int getPatientsCount() {

@@ -10,43 +10,32 @@ public class Hospital {
     public void come(Human human) {
         human.soutStatus("come to hospital.");
         Doctor doctor = reception.getSomeDoctor(human);
-        if (doctor != null) {
-            boolean isReady = false;
-            while (!isReady) {
+        boolean patientIsReady = false;
+            do {
                 if (doctor.isDead(human)) {
                     morgue.writeIn(human);
-                    isReady = true;
+                    patientIsReady = true;
                 } else if (doctor.isNeedHospitalization(human)) {
                     reception.writeIn(human);
-                    isReady = true;
+                    patientIsReady = true;
                 } else if (doctor.isNeedHeal(human)) {
                     doctor.heal(human);
+                    if (!doctor.isFilingGood()) {
+                        helpDoctor(doctor);
+                        doctor = reception.getSomeDoctor(human);
+                    }
                 } else {
                     human.goHome(" this human is not ill");
-                    isReady = true;
+                    patientIsReady = true;
                 }
-            }
-        } else {
-            human.goHome(" no doctors available");
-        }
+            } while (!patientIsReady);
     }
 
     public void come(Doctor doctor) {
-        boolean isReady = false;
-        while (!isReady) {
-            if (doctor.isDead(doctor)) {
-                morgue.writeIn(doctor);
-                isReady = true;
-            } else if (doctor.isNeedHospitalization(doctor)) {
-                doctor.soutStatus("* will not work today.");
-                reception.writeIn(doctor);
-                isReady = true;
-            } else if (doctor.isNeedHeal(doctor)) {
-                doctor.heal(doctor);
-            } else {
-                reception.addDoctor(doctor);
-                isReady = true;
-            }
+        if (doctor.isFilingGood()) {
+            reception.addDoctor(doctor);
+        } else {
+            helpDoctor(doctor);
         }
     }
 
@@ -73,16 +62,21 @@ public class Hospital {
                     }
                 }
             }
-            else { // doctor feels bad
-//                doctor.soutStatus("feels BAD and CAN'T work more");
-                reception.removeDoctor(doctor);
-                if (doctor.isDead(doctor)) {
-                    morgue.writeIn(doctor);
-                }
-                else {
-                    reception.writeIn(doctor);
-                }
+            else {
+                helpDoctor(doctor);
             }
+        }
+    }
+
+    private void helpDoctor(Doctor doctor) {
+        // doctor feels bad
+                doctor.soutStatus("feels BAD and CAN'T work right now");
+        reception.removeDoctor(doctor);
+        if (doctor.isDead(doctor)) {
+            morgue.writeIn(doctor);
+        }
+        else {
+            reception.writeIn(doctor);
         }
     }
 
