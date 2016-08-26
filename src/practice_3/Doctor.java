@@ -9,6 +9,8 @@ public class Doctor extends Human {
     public static final int LEVEL_MAX = 5;
     public static final int LEVEL_MIN = 1;
     public static final int OPERATING_SELF_DAMAGE = 20;
+    private static final int HEALING_LEVEL_MIN = -10;
+    private static final int HEALING_LEVEL_MAX = 25;
     public final int level;
 
 //    public Doctor(String firstName, String lastName, char gender, Date dateOfBirth, int health, int level) {
@@ -27,8 +29,10 @@ public class Doctor extends Human {
 
     public void heal (Human human) {
         Random random = new Random();
-        soutStatus("* are going to heal " + human.getName() + ".");
-        human.changeHealthBy(random.nextInt(35) - 10);
+        int hpChange = random.nextInt(HEALING_LEVEL_MAX - HEALING_LEVEL_MIN)
+                + HEALING_LEVEL_MIN;
+        human.changeHealthBy(hpChange);
+        soutStatus(String.format("* has added %d points to %s.", hpChange, human.getNameAndHealth()));
 //        human.soutStatus("have heal " + human.getNameAndHealth() +".");
         if (human != this) trySelfDamage();
 //        if (!isFilingGood()) soutStatus("feels BAD and CAN'T work more");
@@ -39,7 +43,7 @@ public class Doctor extends Human {
         boolean damaged = (random.nextInt(level+1) == 0); // doctors 0 level should damage himself only 1/2 times
         if (damaged) {
             changeHealthBy(-OPERATING_SELF_DAMAGE);
-//            soutStatus("has been damaged.");
+            soutStatus(String.format(" damaged on %d points.", OPERATING_SELF_DAMAGE));
         }
 //        else soutStatus("have done operation successful.");
         return damaged;

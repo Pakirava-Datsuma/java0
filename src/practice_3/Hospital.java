@@ -70,7 +70,7 @@ public class Hospital {
 
     private void helpDoctor(Doctor doctor) {
         // doctor feels bad
-                doctor.soutStatus("feels BAD and CAN'T work right now");
+                doctor.soutStatus("* feels BAD and CAN'T work right now");
         reception.removeDoctor(doctor);
         if (doctor.isDead(doctor)) {
             morgue.writeIn(doctor);

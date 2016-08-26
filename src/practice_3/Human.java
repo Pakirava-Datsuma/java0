@@ -60,7 +60,7 @@ public class Human {
 
     public void changeHealthBy(int i) {
         health = Math.min(HEALTH_MAX, Math.max(0, health + i));
-        soutStatus("* health changed to " + getHealth());
+//        soutStatus("* health changed to " + getHealth());
     }
 
     public int getHealth() {
