@@ -10,43 +10,32 @@ public class Hospital {
     public void come(Human human) {
         human.soutStatus("come to hospital.");
         Doctor doctor = reception.getSomeDoctor(human);
-        if (doctor != null) {
-            boolean isReady = false;
-            while (!isReady) {
+        boolean patientIsReady = false;
+            do {
                 if (doctor.isDead(human)) {
                     morgue.writeIn(human);
-                    isReady = true;
+                    patientIsReady = true;
                 } else if (doctor.isNeedHospitalization(human)) {
                     reception.writeIn(human);
-                    isReady = true;
+                    patientIsReady = true;
                 } else if (doctor.isNeedHeal(human)) {
                     doctor.heal(human);
+                    if (!doctor.isFilingGood()) {
+                        helpDoctor(doctor);
+                        doctor = reception.getSomeDoctor(human);
+                    }
                 } else {
                     human.goHome(" this human is not ill");
-                    isReady = true;
+                    patientIsReady = true;
                 }
-            }
-        } else {
-            human.goHome(" no doctors available");
-        }
+            } while (!patientIsReady);
     }
 
     public void come(Doctor doctor) {
-        boolean isReady = false;
-        while (!isReady) {
-            if (doctor.isDead(doctor)) {
-                morgue.writeIn(doctor);
-                isReady = true;
-            } else if (doctor.isNeedHospitalization(doctor)) {
-                doctor.soutStatus("* will not work today.");
-                reception.writeIn(doctor);
-                isReady = true;
-            } else if (doctor.isNeedHeal(doctor)) {
-                doctor.heal(doctor);
-            } else {
-                reception.addDoctor(doctor);
-                isReady = true;
-            }
+        if (doctor.isFilingGood()) {
+            reception.addDoctor(doctor);
+        } else {
+            helpDoctor(doctor);
         }
     }
 
@@ -59,28 +48,38 @@ public class Hospital {
             DoctorWorkList workList = reception.getWorkListWithPatients();
             Doctor doctor = workList.getDoctor();
             Human patient = workList.getFirstPatient();
-            if (healPatient(patient, doctor)) {
+            if (healPatient(patient, doctor)) { // curing ended
                 reception.writeOut(patient);
-                if (doctor.isDead(patient)) {
+                if (doctor.isDead(patient)) { // patient is dead
                     morgue.writeIn(patient);
                 }
-                else {
-                    patient.goHome("he(she) feel good");
+                else { //patient is healthy
+                    try { // he is a doctor
+                        come((Doctor) patient);
+                    }
+                    catch (ClassCastException e) { // he isn't a doctor
+                        patient.goHome("he(she) feel good");
+                    }
                 }
             }
             else {
-                doctor.soutStatus("feels BAD and CAN'T work more");
-                hospitalizeDoctor(doctor);
+                helpDoctor(doctor);
             }
         }
     }
 
-    private void hospitalizeDoctor(Doctor doctor) {
-        doctor.soutStatus("* is hospitalizing...");
+    private void helpDoctor(Doctor doctor) {
+        // doctor feels bad
+                doctor.soutStatus("feels BAD and CAN'T work right now");
         reception.removeDoctor(doctor);
-        reception.writeIn(doctor);
-//        doctor.soutStatus("hospitalized.");
+        if (doctor.isDead(doctor)) {
+            morgue.writeIn(doctor);
+        }
+        else {
+            reception.writeIn(doctor);
+        }
     }
+
 
     // true if patient is health (or dead)
     // false if doctor is filing bad
@@ -103,14 +102,20 @@ public class Hospital {
     }
 
     public void soutStatus() {
-        System.out.println("\nsummary : " + reception.workLists.size()+ " doctors:");
+        System.out.println("\n---------------------\nsummary : ");
+        System.out.println(reception.workLists.size()+ " doctors:");
         for (DoctorWorkList workList :
                 reception.workLists) {
-            System.out.println(workList.doctor.getNameAndHealth() + " patients:");
+            workList.doctor.soutStatus(" patients:");
             for (Human patient :
                     workList.getPatients()) {
-                System.out.println("   "+patient.getNameAndHealth());
+                patient.soutStatus("");
             }
+        }
+        System.out.println(morgue.getBodiesCount() + " bodies in MORGUE:");
+        for (Human body :
+                morgue.getBodies()) {
+            body.soutStatus("");
         }
     }
 }
