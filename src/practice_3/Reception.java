@@ -13,11 +13,11 @@ public class Reception {
     private Set <Doctor> doctors = new HashSet<>();
 //    private int countDoctor = 0;
 
-    public void writeIn (Human human) {
+    public void writeIn (Healable human) {
         DoctorWorkList workList = getFreeWorkList();
         if (workList == null) {
             //this method shouldn't been called from here.
-            human.goHome("this hospital haven't enough doctors! Hire someone! Man is crying :(");
+            ((Human)human).goHome("this hospital haven't enough doctors! Hire someone! Man is crying :(");
         } else {
             workList.add(human);
         }
@@ -39,7 +39,7 @@ public class Reception {
         }
     }
 
-    public void writeOut (Human human) {
+    public void writeOut (Healable human) {
         for (DoctorWorkList workList:
                 workLists)
            workList.remove(human);

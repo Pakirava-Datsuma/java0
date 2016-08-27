@@ -7,19 +7,15 @@ import static java.lang.Math.pow;
 /**
  * Created by swanta on 05.06.16.
  */
-public class Doctor extends Human {
+public class Doctor extends Human implements Healable{
     public static final int LEVEL_MAX = 5;
     public static final int LEVEL_MIN = 1; // must be greater than zero as it used for HumanLimitedSet.limit
     public static final int OPERATING_SELF_DAMAGE = 20;
     private static final int HEALING_LEVEL_MIN = -10;
     private static final int HEALING_LEVEL_MAX = 25;
     public final int level;
-
 //    public Doctor(String firstName, String lastName, char gender, Date dateOfBirth, int health, int level) {
-//        super(firstName, lastName, gender, dateOfBirth, health);
-//        this.level = level;
-//        soutStatus("created: " + this.toString());
-//     }
+    static double CHANCE_TO_BE_HEALED = 0.75;
 
     public Doctor () {
         super();
@@ -29,7 +25,25 @@ public class Doctor extends Human {
         System.out.println("new doctor: " + this.toString());
     }
 
-    public void heal (Human human) {
+    public void heal (Healable patient) {
+        Random random = new Random();
+        double patientFactor = patient.getChanceToBeHealed();
+        double randomFactor = random.nextFloat();
+        // the lower level the lower coefficient
+        double levelFactor = (LEVEL_MAX - level)/10.0 + 1.0; // +1 to avoid zero
+        int hpChange = (int) (
+                (HEALING_LEVEL_MAX - HEALING_LEVEL_MIN)
+                        * pow(randomFactor, levelFactor)
+                        * patientFactor
+                        + HEALING_LEVEL_MIN);
+        ((Human)patient).changeHealthBy(hpChange);
+        soutStatus(String.format("* has added %d points to %s.", hpChange, ((Human)patient).getNameAndHealth()));
+//        human.soutStatus("have heal " + human.getNameAndHealth() +".");
+        trySelfDamage();
+//        if (!isFilingGood()) soutStatus("feels BAD and CAN'T work more");
+    }
+
+    public void heal () {
         Random random = new Random();
         double randomFactor = random.nextFloat();
         // the lower level the lower coefficient
@@ -38,13 +52,9 @@ public class Doctor extends Human {
                 (HEALING_LEVEL_MAX - HEALING_LEVEL_MIN)
                         * pow(randomFactor, levelFactor)
                         + HEALING_LEVEL_MIN);
-        human.changeHealthBy(hpChange);
-        soutStatus(String.format("* has added %d points to %s.", hpChange, human.getNameAndHealth()));
-//        human.soutStatus("have heal " + human.getNameAndHealth() +".");
-        if (human != this) trySelfDamage();
-//        if (!isFilingGood()) soutStatus("feels BAD and CAN'T work more");
+        this.changeHealthBy(hpChange);
+        soutStatus(String.format("* added %d points to self.", hpChange));
     }
-
     private boolean trySelfDamage() {
         Random random = new Random();
         boolean damaged = (random.nextInt(level+1) == 0); // doctors 0 level should damage himself only 1/2 times
@@ -62,12 +72,12 @@ public class Doctor extends Human {
         return (human.getHealth() < HEALTH_NEEDS_HEAL);
     }
 
-    private void soutDiagnose(Human human, String diagnose) {
+    private void soutDiagnose(Healable human, String diagnose) {
 //        System.out.print(getNameAndHealth()+" diagnose: ");
 //        human.soutStatus(diagnose);
     }
 
-    public boolean isNeedHeal (Human human) {
+    public boolean isNeedHeal (Healable human) {
         boolean result = (human.getHealth() < HEALTH_MAX);
         if (result)
             soutDiagnose(human, "needs some heal");
@@ -81,22 +91,14 @@ public class Doctor extends Human {
         return super.toString() + " DOCTOR level " + level +".";
     }
 
-    public boolean isDead(Human human) {
+    public boolean isDead(Healable human) {
         boolean result = human.getHealth() < 1;
-        if (result) {
-            if (this == human) {
-                soutStatus("is chocked because of finding himself dead.");
-            } else {
-                soutDiagnose(human, " have die in age of " + human.age
-                        + ". Doctor is very sorry.");
-            }
-        } //else soutDiagnose(human, "is alive.");
         return result;
     }
 
     public boolean isFilingGood() {
         while (isNeedHeal(this) && !isNeedHospitalization(this)) {
-                this.heal(this);
+                this.heal();
         }
         return !isNeedHospitalization(this);
     }
@@ -110,5 +112,10 @@ public class Doctor extends Human {
         Doctor doctor = new Doctor();
         doctor.health = HEALTH_MAX;
         return doctor;
+    }
+
+    @Override
+    public double getChanceToBeHealed() {
+        return CHANCE_TO_BE_HEALED;
     }
 }

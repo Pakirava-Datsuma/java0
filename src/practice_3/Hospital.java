@@ -7,25 +7,25 @@ public class Hospital {
     private Reception reception = new Reception();
     private Morgue morgue = new Morgue();
 
-    public void come(Human human) {
-        human.soutStatus("come to hospital.");
+    public void come(Patient patient) {
+        patient.soutStatus("come to hospital.");
         Doctor doctor = reception.getFreeDoctor();
         boolean patientIsReady = false;
             do {
-                if (doctor.isDead(human)) {
-                    morgue.writeIn(human);
+                if (doctor.isDead(patient)) {
+                    morgue.writeIn(patient);
                     patientIsReady = true;
-                } else if (doctor.isNeedHospitalization(human)) {
-                    reception.writeIn(human);
+                } else if (doctor.isNeedHospitalization(patient)) {
+                    reception.writeIn(patient);
                     patientIsReady = true;
-                } else if (doctor.isNeedHeal(human)) {
-                    doctor.heal(human);
+                } else if (doctor.isNeedHeal(patient)) {
+                    doctor.heal(patient);
                     if (!doctor.isFilingGood()) {
                         helpDoctor(doctor);
                         doctor = reception.getFreeDoctor();
                     }
                 } else {
-                    human.goHome(" this human is not ill");
+                    patient.goHome(" this patient is not ill");
                     patientIsReady = true;
                 }
             } while (!patientIsReady);
@@ -47,7 +47,7 @@ public class Hospital {
         while (!isEmptyOfPatients()) {
             DoctorWorkList workList = reception.getWorkListWithPatients();
             Doctor doctor = workList.getDoctor();
-            Human patient = workList.getFirstPatient();
+            Healable patient = workList.getFirstPatient();
             /*
             Reception shall not check if patient needs healing.
             Reception only managing contents of worklists
@@ -59,14 +59,14 @@ public class Hospital {
             if (healPatient(patient, doctor)) { // curing ended
                 reception.writeOut(patient);
                 if (doctor.isDead(patient)) { // patient is dead
-                    morgue.writeIn(patient);
+                    morgue.writeIn((Human)patient);
                 }
                 else { //patient is healthy
                     try { // he is a doctor
                         come((Doctor) patient);
                     }
                     catch (ClassCastException e) { // he isn't a doctor
-                        patient.goHome("he(she) feel good");
+                        ((Human)patient).goHome("he(she) feel good");
                     }
                 }
             }
@@ -94,7 +94,7 @@ public class Hospital {
     // if both (1) and (2)
     //    it's important to hospitalize doctor
     //    and let another doctor check the patient
-    public boolean healPatient(Human patient, Doctor doctor) {
+    public boolean healPatient(Healable patient, Doctor doctor) {
         while (doctor.isFilingGood() && doctor.isNeedHeal(patient) && !doctor.isDead(patient)) {
             doctor.heal(patient);
         };
@@ -115,9 +115,9 @@ public class Hospital {
         for (DoctorWorkList workList :
                 reception.workLists) {
             workList.doctor.soutStatus(" patients:");
-            for (Human patient :
+            for (Healable patient :
                     workList.getPatients()) {
-                patient.soutStatus("");
+                ((Human)patient).soutStatus("");
             }
         }
         System.out.println(morgue.getBodiesCount() + " bodies in MORGUE:");

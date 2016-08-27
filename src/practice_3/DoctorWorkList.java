@@ -16,19 +16,19 @@ public class DoctorWorkList {
         patients = new HumanLimitedSet(doctor.level);
     }
 
-    public boolean add(Human human) {
+    public boolean add(Healable human) {
         boolean result = (patients.add(human));
         if (result) {
-            human.soutStatus("have been written in worklist of doctor "
+            ((Human)human).soutStatus("have been written in worklist of doctor "
                     + doctor.getName());
         }
         else {
-            human.goHome(" workList.add ERROR");
+            ((Human)human).goHome(" workList.add ERROR");
         }
         return result;
     }
 
-    public boolean remove(Object human) {
+    public boolean remove(Healable human) {
         boolean result = (patients.remove(human));
 //        if (result) {
 //            ((Human)human).soutStatus("have been removed from worklist of doctor "
@@ -37,7 +37,7 @@ public class DoctorWorkList {
         return result;
     }
 
-    public List<Human> getPatients() {
+    public List<Healable> getPatients() {
         return patients.stream().collect(Collectors.toList());
     }
 
@@ -49,7 +49,7 @@ public class DoctorWorkList {
         return doctor;
     }
 
-    public Human getFirstPatient() {
+    public Healable getFirstPatient() {
         try {
             return patients.stream()
                     .findFirst()

@@ -5,7 +5,7 @@ import java.util.HashSet;
 /**
  * Created by swanta on 23.06.16.
  */
-public class HumanLimitedSet extends HashSet<Human> {
+public class HumanLimitedSet extends HashSet<Healable> {
     protected int patientsMaxCount = 0;
 
     public HumanLimitedSet(int limit){
@@ -18,7 +18,7 @@ public class HumanLimitedSet extends HashSet<Human> {
     // hide constructor without arguments
     private HumanLimitedSet(){}
     @Override
-    public boolean add(Human human) {
+    public boolean add(Healable human) {
         boolean result = false;
         if ((size() < patientsMaxCount)
                 && super.add(human)) {

@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * Created by swanta on 05.06.16.
  */
-public class Human {
+public abstract class Human {
     public static final char MALE = 'm';
     public static final char FEMALE = 'f';
     public String firstName;
@@ -93,4 +93,6 @@ public class Human {
         soutStatus(why);
         usedNames.remove(getName());
     }
+
+
 }

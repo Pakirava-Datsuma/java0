@@ -26,7 +26,7 @@ public class StartApplication {
                 hospital.come(new Doctor());
             }
             else {
-                hospital.come(new Human());
+                hospital.come(Patient.getPatient());
             }
 //            System.out.print(i + ": ------------");
         }
