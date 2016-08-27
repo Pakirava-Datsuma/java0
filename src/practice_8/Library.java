@@ -43,22 +43,37 @@ public class Library {
 //    };
 
 
-    private File libraryFile = new File("testLibrary.lib");
+    private File libraryFile;
     private boolean isFileLoaded = false;
 
-    public Library() {
+    private Library(File file) {
+        this.libraryFile = file;
         if (this.libraryFile.exists()) {
             loadBooksFromFile();
+        }
+    }
+
+    public static Library createNonSerializableLibrary() {
+        return new Library(null);
+    }
+    public static Library createSerializableLibrary(String filename) {
+        File newFile = new File(filename);
+        if (newFile == null) {
+            return null;
+        }
+        else {
+            Library newLibrary = new Library(newFile);
+            return newLibrary;
         }
     }
 
     public boolean loadBooksFromFile (){
         isFileLoaded = false;
         try (FileInputStream fis = new FileInputStream(libraryFile)) {
-            ArrayList<BookData> bookData;// = new ArrayList<>();
+            List<Book> books = new ArrayList<>();
             ObjectInputStream ois = new ObjectInputStream(fis);
-            bookData = (ArrayList<BookData>) ois.readObject();
-            this.books.setAll(Book.getBooks(bookData));
+            books = (List<Book>) ois.readObject();
+            this.books = FXCollections.observableArrayList(books);
             isFileLoaded = true;
         }  catch (ClassNotFoundException e) {
             //"no books were saved earlier"
@@ -74,7 +89,7 @@ public class Library {
         isFileLoaded = false;
         try (FileOutputStream fis = new FileOutputStream(libraryFile, false)) { //file will be overwritten
             ObjectOutputStream ois = new ObjectOutputStream(fis);
-            ois.writeObject(Book.getBooksData(books));
+            ois.writeObject(books);
             isFileLoaded = true;
         } catch (IOException e) {
             e.printStackTrace();

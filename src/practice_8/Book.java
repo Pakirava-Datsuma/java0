@@ -8,6 +8,10 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,32 +19,38 @@ import java.util.stream.Collectors;
 /**
  * Created by swanta on 17.07.16.
  */
-public class Book{
+public class Book implements Serializable {
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
     private final static String NEXT_PLANNING_DATE_STRING = "future";
 
+    transient
     private final SimpleStringProperty title = new SimpleStringProperty() {{ addListener((observable, oldValue, newValue) -> {
-        data.setTitle(newValue);
-    });}};;
+        data.setTitle(newValue);});}};;
 
+    transient
     private final SimpleStringProperty author = new SimpleStringProperty() {{addListener((observable, oldValue, newValue) -> {
-        data.setAuthor(newValue);
-    });}};;
-    private final SimpleStringProperty genre = new SimpleStringProperty() {{addListener((observable, oldValue, newValue) -> {
-        data.setGenre(newValue);
-    });}};;
-    private final IntegerProperty pages = new SimpleIntegerProperty() {{addListener((observable, oldValue, newValue) -> {
-        data.setPages(newValue.intValue());
-    });}};;
-    public final IntegerProperty todayPagesToAdd = new SimpleIntegerProperty() {{addListener((observable, oldValue, newValue) -> {
-        data.setPages(newValue.intValue());
-    });}};
+        data.setAuthor(newValue);});}};;
 
+    transient
+    private final SimpleStringProperty genre = new SimpleStringProperty() {{addListener((observable, oldValue, newValue) -> {
+        data.setGenre(newValue);});}};;
+
+    transient
+    private final IntegerProperty pages = new SimpleIntegerProperty() {{addListener((observable, oldValue, newValue) -> {
+        data.setPages(newValue.intValue());});}};;
+
+    transient
+    public final IntegerProperty todayPagesToAdd = new SimpleIntegerProperty() {{addListener((observable, oldValue, newValue) -> {
+        data.setPages(newValue.intValue());});}};
+
+    transient
     private ObservableList<XYChart.Data<String, Number>> realSeriesData = FXCollections.observableList(
             new ArrayList<XYChart.Data<String, Number>>());
+    transient
     private ObservableList<XYChart.Data<String, Number>> planSeriesData = FXCollections.observableList(
             new ArrayList<XYChart.Data<String, Number>>());
 
+    transient
     private BookData data = new BookData() {{
         //link realSeriesData to planSeriesData & data
         realSeriesData.addListener(new ListChangeListener<XYChart.Data<String, Number>>() {
@@ -82,9 +92,9 @@ public class Book{
     }
 
     public Book(BookData data) {
-        this(data.getTitle(), data.getAuthor(), data.getGenre(), data.getPages());
+//        this(data.getTitle(), data.getAuthor(), data.getGenre(), data.getPages());
         this.data = data;
-//        linkSeriesData();
+        setPropertiesFromData();
     }
     public Book(String title, String author, String genre, int pagesCount) {
 //        linkSeriesData();
@@ -195,7 +205,11 @@ public class Book{
                 .collect(Collectors.toList());
     }
     public static List<BookData> getBooksData(List<Book> books) {
-        return books.stream().map(Book::getData).collect(Collectors.toList());
+        List<BookData> result = new ArrayList<BookData>();
+        for (Book book : books) {
+            result.add(book.getData());
+        }
+        return result;
     }
 
 //    public void setData(BookData data) {
@@ -209,5 +223,21 @@ public class Book{
         final float READ_PERCENTAGE = 50;
         book.realSeriesData.setAll(
                 book.getData().getRandomStatistics(READ_PERCENTAGE));
+    }
+
+    // this method shouldn't use any BookData as input
+    private void setPropertiesFromData() {
+        setTitle(data.getTitle());
+        setAuthor(data.getAuthor());
+        setGenre(data.getGenre());
+        setPages(data.getPages());
+    }
+    public final void writeObject(ObjectOutputStream oos) throws IOException{
+        oos.writeObject(this.data);
+    }
+
+    public final void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        data = (BookData)ois.readObject();
+        setPropertiesFromData();
     }
 }

@@ -15,11 +15,11 @@ import java.util.List;
  * Created by swanta on 13.08.16.
  */
 public class UIExampleApp {
-    private static Library testLibrary = new Library();
+    private static Library testLibrary = Library.createSerializableLibrary("testlibrary.lib");
 
     public static void main(String[] args) {
-        test();
-//        Application.launch(LibraryGUI.class, args);
+//        test();
+        Application.launch(LibraryGUI.class, args);
     }
 
     private static void test() {
@@ -51,7 +51,8 @@ public class UIExampleApp {
                 setReadStatistics(FXCollections.observableList(list1));
             }};
             list.add(bookData);
-            oos.writeObject(new ArrayList(Book.getBooksData(testLibrary.getBooks())));
+            oos.writeObject(list);
+            oos.writeObject(new ArrayList<BookData>(Book.getBooksData(testLibrary.getBooks())));
             result = "ok";
         } catch (IOException e) {
             e.printStackTrace();
@@ -64,7 +65,7 @@ public class UIExampleApp {
         System.out.println("-------testAddTestBooks-----------");
         testLibrary.addBook("H.Potter", "J.Roulling", "fantasy", 321);
         testLibrary.addBook("Diving into C++", "H.Deiteil, R.Deiteil", "study", 810);
-        testLibrary.getBooks().stream().forEach(Book::setRandomStatistics);
+        testLibrary.getBooks().forEach(Book::setRandomStatistics);
         System.out.println("total books in library: " + testLibrary.getBooks().size());
     }
     public static void testWriteBooks() {
