@@ -2,12 +2,14 @@ package practice_3;
 
 import java.util.Random;
 
+import static java.lang.Math.pow;
+
 /**
  * Created by swanta on 05.06.16.
  */
 public class Doctor extends Human {
     public static final int LEVEL_MAX = 5;
-    public static final int LEVEL_MIN = 1;
+    public static final int LEVEL_MIN = 1; // must be greater than zero as it used for HumanLimitedSet.limit
     public static final int OPERATING_SELF_DAMAGE = 20;
     private static final int HEALING_LEVEL_MIN = -10;
     private static final int HEALING_LEVEL_MAX = 25;
@@ -29,8 +31,13 @@ public class Doctor extends Human {
 
     public void heal (Human human) {
         Random random = new Random();
-        int hpChange = random.nextInt(HEALING_LEVEL_MAX - HEALING_LEVEL_MIN)
-                + HEALING_LEVEL_MIN;
+        double randomFactor = random.nextFloat();
+        // the lower level the lower coefficient
+        double levelFactor = (LEVEL_MAX - level)/10.0 + 1.0; // +1 to avoid zero
+        int hpChange = (int) (
+                (HEALING_LEVEL_MAX - HEALING_LEVEL_MIN)
+                        * pow(randomFactor, levelFactor)
+                        + HEALING_LEVEL_MIN);
         human.changeHealthBy(hpChange);
         soutStatus(String.format("* has added %d points to %s.", hpChange, human.getNameAndHealth()));
 //        human.soutStatus("have heal " + human.getNameAndHealth() +".");

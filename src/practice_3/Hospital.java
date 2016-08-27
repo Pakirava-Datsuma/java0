@@ -9,7 +9,7 @@ public class Hospital {
 
     public void come(Human human) {
         human.soutStatus("come to hospital.");
-        Doctor doctor = reception.getSomeDoctor(human);
+        Doctor doctor = reception.getFreeDoctor();
         boolean patientIsReady = false;
             do {
                 if (doctor.isDead(human)) {
@@ -22,7 +22,7 @@ public class Hospital {
                     doctor.heal(human);
                     if (!doctor.isFilingGood()) {
                         helpDoctor(doctor);
-                        doctor = reception.getSomeDoctor(human);
+                        doctor = reception.getFreeDoctor();
                     }
                 } else {
                     human.goHome(" this human is not ill");
@@ -52,7 +52,7 @@ public class Hospital {
             Reception shall not check if patient needs healing.
             Reception only managing contents of worklists
                 and collection of doctors.
-            So technical specification has a lot of mistakes and misunderstoods.
+            So technical specification of this task has a lot of mistakes and misunderstands.
             And this code reflects missing of effective TS in quality of code.
             So I'm sorry for all this spaghetti :)
              */

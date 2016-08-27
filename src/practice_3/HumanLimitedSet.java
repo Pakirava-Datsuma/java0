@@ -9,6 +9,9 @@ public class HumanLimitedSet extends HashSet<Human> {
     protected int patientsMaxCount = 0;
 
     public HumanLimitedSet(int limit){
+        if (limit < 1) {
+            System.out.println("ERROR: zero space HumanLimitedSet!");
+        }
         patientsMaxCount = limit;
     }
 
@@ -17,7 +20,7 @@ public class HumanLimitedSet extends HashSet<Human> {
     @Override
     public boolean add(Human human) {
         boolean result = false;
-        if (!(size() > patientsMaxCount)
+        if ((size() < patientsMaxCount)
                 && super.add(human)) {
             result = true;
         }

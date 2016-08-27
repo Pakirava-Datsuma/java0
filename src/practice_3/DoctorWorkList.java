@@ -22,6 +22,9 @@ public class DoctorWorkList {
             human.soutStatus("have been written in worklist of doctor "
                     + doctor.getName());
         }
+        else {
+            human.goHome(" workList.add ERROR");
+        }
         return result;
     }
 

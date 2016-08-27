@@ -32,7 +32,7 @@ public class Reception {
 //        }
         try {
             return workLists.stream()
-                    .min((l1, l2) -> l1.getFreeSpace() - l2.getFreeSpace())
+                    .max((l1, l2) -> l1.getFreeSpace() - l2.getFreeSpace())
                     .get();
         } catch (NoSuchElementException e) {
             return null;
@@ -60,29 +60,8 @@ public class Reception {
         return true;
     }
 
-    public Doctor getSomeDoctor(Human human) {
-        //public wrapper for getFreeDoctor()
-        //TODO: replace with getFreeDoctor()
-        return getFreeDoctor();
-    }
-
-    private Doctor getFreeDoctor() {
+    public Doctor getFreeDoctor() {
         return getFreeWorkList().doctor;
-    }
-
-
-    public Doctor getSomeDoctor() {
-        Doctor doctor;
-        try {
-            doctor = doctors.iterator().next();
-        }
-        catch (NoSuchElementException e) {
-            soutStatus("\n...not enough doctors! need to hire one.");
-            doctor = hireNewDoctor();
-        }
-//        soutStatus("doctor found.");
-//        doctor.soutStatus("is ready.");
-        return doctor;
     }
 
     private Doctor hireNewDoctor() {
