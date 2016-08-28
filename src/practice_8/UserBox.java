@@ -6,16 +6,16 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Box;
 
 /**
  * Created by swanta on 27.08.16.
  */
 public class UserBox extends VBox {
-    private SimpleObjectProperty<LibraryUser> user = new SimpleObjectProperty<LibraryUser>() {{
+
+    private ChoiceBox<Library> libraryChoice;
+
+    private SimpleObjectProperty<User> user = new SimpleObjectProperty<User>() {{
         addListener((observable, oldValue, newValue) -> {
             userName.setValue(user.getValue().getName());
             userPhotoPath.setValue(user.getValue().getPathToPhoto());
@@ -53,11 +53,13 @@ public class UserBox extends VBox {
 
     {
         getChildren().addAll(labelImg, programInfoBox);
+        libraryChoice = new ChoiceBox<Library>();
+
     }
 
     public UserBox() {
     }
-    public void setUser (LibraryUser user) {
+    public void setUser (User user) {
         setPhoto(user.getPathToPhoto());
         String userName = user.getName();
         labelImg.setText(userName);

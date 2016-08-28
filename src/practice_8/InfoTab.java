@@ -1,11 +1,13 @@
 package practice_8;
 
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Tab;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 
@@ -18,20 +20,36 @@ import java.util.stream.Collectors;
 /**
  * Created by swanta on 28.08.16.
  */
-public class UserInfoTab extends Tab {
-    private ChoiceBox<Library> libraryChoice = new ChoiceBox<Library>(){};
-    PieChart pie = new PieChart();
-    Pane userBox = new UserBox();
-    Pane progressPane = new HBox(pie, userBox);
-    List<Book> books;
+public class InfoTab extends Tab {
+
+    private Pane rootPane;
+    private Pane userInfoPane;
+    private Pane libraryInfoPane;
+    private Pane programInfoPane;
+    private List<Book> books;
+    private SimpleObjectProperty<User> user;
 
     {
+        // self settings
+
+        userInfoPane = new UserBox();
+        libraryInfoPane = new LibraryBox();
+
+        rootPane = new GridPane() {{
+            setConstraints(libraryInfoPane, 0, 0, 1, 2);
+            setConstraints(userInfoPane, 1, 0);
+            setConstraints(programInfoPane, 1, 1);
+        }};
+
         setText("Statistics");
-        setContent(progressPane);
+        setContent(rootPane);
         setClosable(false);
     }
 
-    public UserInfoTab(ObservableList<Book> books) {
+    public InfoTab(ObservableList<Book> books, SimpleObjectProperty<User> user) {
+
+        //outer links (listeners)
+
         books.addListener(new ListChangeListener<Book>() {
             @Override
             public void onChanged(Change<? extends Book> c) {
@@ -45,7 +63,12 @@ public class UserInfoTab extends Tab {
                 }
             }
         });
+        user.addListener((observable, oldUser, newUser) -> {
+            updateUser();
+        });
         this.books = books;
+        this.user = user;
+        this.libraries = libraries;
     }
 
     private void updatePie() {
@@ -61,5 +84,9 @@ public class UserInfoTab extends Tab {
 
     }
 
+
+    public void updateUser() {
+
+    }
 
 }
