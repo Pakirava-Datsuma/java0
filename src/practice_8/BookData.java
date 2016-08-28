@@ -141,9 +141,9 @@ public class BookData implements Serializable {
     public static List<XYChart.Data<String, Number>> getRandomStatistics(int pages, float readPercentage) {
 //        if (readPercentage > 100) throw new ArithmeticException("can't generate pages larger than 100%");
         Random random = new Random();
-        final int MIN_PAGES_READING = 1;
+//        final int MIN_PAGES_READING = 1;
         final int MAX_PAGES_READING = 60;
-        int pagesToRead = (int) (readPercentage / 100 * pages);// - MIN_PAGES_READING;
+        int pagesToRead = (int) (readPercentage / 100.0 * pages);// - MIN_PAGES_READING;
         long time = new Date().getTime();
         final long ONE_DAY_TIME = 24*3600*1000;
         final long MIN_DATE_INTERVAL = 1*ONE_DAY_TIME;
@@ -156,6 +156,7 @@ public class BookData implements Serializable {
             pagesLeft -= random.nextInt(MAX_PAGES_READING);// + MIN_PAGES_READING;
             time -= random.nextFloat() * RANDOM_DATE_INTERVAL + MIN_DATE_INTERVAL;
         }
+        randomDatas.sort(dataComparatorOnlyDate);
         return randomDatas;
     }
 }

@@ -3,6 +3,8 @@ package practice_8;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -32,8 +34,25 @@ public class Book implements Serializable {
         data.setAuthor(newValue);});}};;
 
     transient
+    private SimpleStringProperty titleAndAuthor = new SimpleStringProperty() {
+        ChangeListener<? super String> titleAndAutorListener = new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                titleAndAuthor.setValue(
+                        String.format("\"%s\" by %s"
+                                ,title.getValue()
+                                ,author.getValue()));
+            }
+        };
+        {
+            title.addListener(titleAndAutorListener);
+            author.addListener(titleAndAutorListener);
+        }
+    };
+
+    transient
     private final SimpleStringProperty genre = new SimpleStringProperty() {{addListener((observable, oldValue, newValue) -> {
-        data.setGenre(newValue);});}};;
+        data.setGenre(newValue);});}};
 
     transient
     private final IntegerProperty pages = new SimpleIntegerProperty() {{addListener((observable, oldValue, newValue) -> {
@@ -42,14 +61,13 @@ public class Book implements Serializable {
     transient
     public final IntegerProperty todayPagesToAdd = new SimpleIntegerProperty() {{addListener((observable, oldValue, newValue) -> {
         data.setPages(newValue.intValue());});}};
-
     transient
     private ObservableList<XYChart.Data<String, Number>> realSeriesData = FXCollections.observableList(
             new ArrayList<XYChart.Data<String, Number>>());
+
     transient
     private ObservableList<XYChart.Data<String, Number>> planSeriesData = FXCollections.observableList(
             new ArrayList<XYChart.Data<String, Number>>());
-
     transient
     private BookData data = new BookData() {{
         //link realSeriesData to planSeriesData & data
@@ -85,6 +103,24 @@ public class Book implements Serializable {
             }
         });
     }};
+    private int readPages;
+
+    {
+        realSeriesData.addListener(
+                new ListChangeListener<XYChart.Data<String, Number>>() {
+                    @Override
+                    public void onChanged(Change<? extends XYChart.Data<String, Number>> c) {
+                        if (realSeriesData.size() > 0)
+                            setReadPages(
+                                    realSeriesData.stream()
+                                            .mapToInt(data -> data.getYValue().intValue())
+                                            .max()
+                                            .getAsInt());
+                                    else
+                                        setReadPages(0);
+                    }
+                });
+    }
 
     @Override
     public String toString() {
@@ -239,5 +275,21 @@ public class Book implements Serializable {
     public final void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         data = (BookData)ois.readObject();
         setPropertiesFromData();
+    }
+
+    public int getReadPages() {
+        return readPages;
+    }
+
+    public void setReadPages(int readPages) {
+        this.readPages = readPages;
+    }
+
+    public String getTitleAndAuthor() {
+        return titleAndAuthor.getValue();
+    }
+
+    public ObservableList<XYChart.Data<String, Number>> getPlanData() {
+        return planSeriesData;
     }
 }

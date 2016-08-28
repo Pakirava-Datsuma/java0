@@ -15,7 +15,7 @@ import java.util.List;
  * Created by swanta on 13.08.16.
  */
 public class UIExampleApp {
-    private static Library testLibrary = Library.createSerializableLibrary("testlibrary.lib");
+    private static Library testLibrary = Library.createSerializableLibrary("library.lib");
 
     public static void main(String[] args) {
 //        test();
@@ -26,7 +26,7 @@ public class UIExampleApp {
         testLibrary.getBooks().clear();
         testAddTestBooks();
         testSerialize();
-//        testWriteBooks();
+        testWriteBooks();
 //        testLoadBooks();
 //        testShowBooks();
 

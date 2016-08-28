@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  * Created by swanta on 13.08.16.
  */
 public class Library {
+    private LibraryUser user;
     private ObservableList<Book> books = FXCollections.observableArrayList();
 //    private ArrayList<BookData> booksData = new ArrayList<>();
 //    private ListChangeListener booksDataUpdater = new ListChangeListener<Book>() {
