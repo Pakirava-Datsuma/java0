@@ -103,7 +103,7 @@ public class Book implements Serializable {
             }
         });
     }};
-    private int readPages;
+    private SimpleIntegerProperty readPages = new SimpleIntegerProperty();
 
     {
         realSeriesData.addListener(
@@ -278,11 +278,15 @@ public class Book implements Serializable {
     }
 
     public int getReadPages() {
+        return readPages.getValue();
+    }
+
+    public SimpleIntegerProperty getReadPagesProperty() {
         return readPages;
     }
 
     public void setReadPages(int readPages) {
-        this.readPages = readPages;
+        this.readPages.setValue(readPages);
     }
 
     public String getTitleAndAuthor() {

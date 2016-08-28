@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -70,13 +69,13 @@ public class UIExampleApp {
     }
     public static void testWriteBooks() {
         System.out.println("-------testWriteBooks-----------");
-        testLibrary.saveBooksToFile();
+        testLibrary.saveLibrary();
         System.out.println("test book set: " + (testLibrary.isFileLoaded() ? "written ok" : "write FAILED"));
     }
 
     private static void testLoadBooks() {
         System.out.println("-------testLoadBooks-----------");
-        testLibrary.loadBooksFromFile();
+        testLibrary.loadLibrary();
         System.out.println("test book set: " + (testLibrary.isFileLoaded() ? "loaded ok" : "load FAILED"));
     }
 }

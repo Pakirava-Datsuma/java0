@@ -142,7 +142,7 @@ public class BookData implements Serializable {
 //        if (readPercentage > 100) throw new ArithmeticException("can't generate pages larger than 100%");
         Random random = new Random();
 //        final int MIN_PAGES_READING = 1;
-        final int MAX_PAGES_READING = 60;
+        final int MAX_PAGES_READING = 160;
         int pagesToRead = (int) (readPercentage / 100.0 * pages);// - MIN_PAGES_READING;
         long time = new Date().getTime();
         final long ONE_DAY_TIME = 24*3600*1000;

@@ -1,101 +1,92 @@
 package practice_8;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Created by swanta on 13.08.16.
  */
-public class Library {
+public class Library implements Serializable{
+    private static final String FILENAME_REGEX = ".+\\.lib";
     private LibraryUser user;
-    private ObservableList<Book> books = FXCollections.observableArrayList();
-//    private ArrayList<BookData> booksData = new ArrayList<>();
-//    private ListChangeListener booksDataUpdater = new ListChangeListener<Book>() {
-//        {
-//            books.addListener(this);
-//        }
-//
-//        @Override
-//        public void onChanged(Change<? extends Book> changeList) {
-//            while (changeList.next()) {
-//                if (changeList.wasAdded()) {
-//                    booksData.addAll(
-//                            changeList.getAddedSubList().stream()
-//                                    .map(Book::getData)
-//                                    .collect(Collectors.toList()));
-//                } else if (changeList.wasRemoved()) {
-//                    booksData.removeAll(
-//                            changeList.getRemoved().stream()
-//                                    .map(Book::getData)
-//                                    .collect(Collectors.toList())
-//                    );
-//                } else {
-//                    throw new RuntimeException("unexpected changes in ObservableList of books in library");
-//                }
-//            }
-//        }
-//    };
+    transient private ObservableList<Book> books = FXCollections.observableArrayList();
 
+    transient private File libraryFile;
+//    transient private boolean isFileLoaded = false;
+    private Book[] serializableBookList;
 
-    private File libraryFile;
-    private boolean isFileLoaded = false;
+    public static List<Library> getSerializedLibraries () {
+        File[] files = new File(".").listFiles((dir, name) -> name.matches(FILENAME_REGEX));
 
-    private Library(File file) {
-        this.libraryFile = file;
-        if (this.libraryFile.exists()) {
-            loadBooksFromFile();
-        }
+        List<String> names = Arrays.asList(files).stream()
+                .map(File::getName)
+                .collect(Collectors.toList());
+
+        List<Library> libraries =
+            names.stream()
+                    .map(Library::createSerializableLibrary)
+                    .collect(Collectors.toList());
+        return libraries;
     }
 
+    private Library (){};
+//    private Library (File file){};
+
     public static Library createNonSerializableLibrary() {
-        return new Library(null);
+        return new Library();
     }
     public static Library createSerializableLibrary(String filename) {
         File newFile = new File(filename);
-        if (newFile == null) {
+        if (!newFile.exists()) {
             return null;
         }
         else {
-            Library newLibrary = new Library(newFile);
-            return newLibrary;
+            return loadLibrary(newFile);
         }
     }
 
-    public boolean loadBooksFromFile (){
-        isFileLoaded = false;
-        try (FileInputStream fis = new FileInputStream(libraryFile)) {
-            List<Book> books = new ArrayList<>();
+    public static Library loadLibrary(File file){
+        Library library = null;
+        try (FileInputStream fis = new FileInputStream(file)) {
             ObjectInputStream ois = new ObjectInputStream(fis);
-            books = (List<Book>) ois.readObject();
-            this.books = FXCollections.observableArrayList(books);
-            isFileLoaded = true;
+            library = (Library) ois.readObject();
+            library.setSerializableBooks();
         }  catch (ClassNotFoundException e) {
             //"no books were saved earlier"
             e.printStackTrace();
+            library = null;
         } catch (IOException e) {
             //"can't access file"
             e.printStackTrace();
         }
-        return isFileLoaded;
+        return library;
     }
 
-    public boolean saveBooksToFile () {
-        isFileLoaded = false;
+    private void setSerializableBooks() {
+        books = FXCollections.observableArrayList(serializableBookList);
+    }
+
+    public static boolean saveLibrary(Library library) {
+        File libraryFile = library.libraryFile;
         try (FileOutputStream fis = new FileOutputStream(libraryFile, false)) { //file will be overwritten
             ObjectOutputStream ois = new ObjectOutputStream(fis);
-            ois.writeObject(books);
-            isFileLoaded = true;
+            library.getSerializableBooks();
+            ois.writeObject(library);
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
-        return isFileLoaded;
+    }
+
+    private void getSerializableBooks() {
+        serializableBookList = books.toArray(serializableBookList);
     }
 
     public ObservableList<Book> getBooks(){
@@ -107,9 +98,9 @@ public class Library {
         books.add(newBook);
     }
 
-    public boolean isFileLoaded() {
-        return isFileLoaded;
-    }
+//    public boolean isFileLoaded() {
+//        return isFileLoaded;
+//    }
 
 
 }
