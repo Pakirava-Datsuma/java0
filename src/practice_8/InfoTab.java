@@ -24,14 +24,14 @@ public class InfoTab extends Tab {
         libraryInfoPane = new LibraryBox();
         programInfoPane = new ProgramInfoBox();
 
-        rootPane = new GridPane() {{
-            setConstraints(libraryInfoPane, 0, 0, 1, 2);
-            setConstraints(userInfoPane, 1, 0);
-            setConstraints(programInfoPane, 1, 1);
-        }};
+        GridPane.setConstraints(libraryInfoPane, 0, 0, 1, 2);
+        GridPane.setConstraints(userInfoPane, 1, 0);
+        GridPane.setConstraints(programInfoPane, 1, 1);
+        rootPane = new GridPane();
+        rootPane.getChildren().addAll(libraryInfoPane, userInfoPane, programInfoPane);
 
         setText("Statistics");
-        setContent(rootPane);
+        this.setContent(rootPane);
         setClosable(false);
     }
 
