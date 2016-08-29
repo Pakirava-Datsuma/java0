@@ -1,8 +1,6 @@
 package practice_8;
 
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.collections.ListChangeListener;
 import javafx.scene.chart.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
@@ -11,15 +9,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by swanta on 27.08.16.
  */
 public class BookTab extends Tab {
-    private SimpleObjectProperty<Book> currentBook = new SimpleObjectProperty<Book>() {{
-        addListener((observable, oldValue, newValue) -> setText(((Book)newValue).getTitleAndAuthor()));
+    private SimpleObjectProperty<ObservableBook> currentBook = new SimpleObjectProperty<ObservableBook>() {{
+        addListener((observable, oldValue, newValue) -> setText(((ObservableBook)newValue).getTitleAndAuthor()));
     }};
 
 
@@ -54,15 +49,15 @@ public class BookTab extends Tab {
         setContent(progressBox);
     }
 
-    public BookTab(Book Book) {
-        this.currentBook.setValue(Book);
+    public BookTab(ObservableBook ObservableBook) {
+        this.currentBook.setValue(ObservableBook);
     }
 
-    public Book getBook() {
+    public ObservableBook getBook() {
         return currentBook.getValue();
     }
 
-    public boolean has(Book book) {
-        return getBook() == book;
+    public boolean has(ObservableBook observableBook) {
+        return getBook() == observableBook;
     }
 }

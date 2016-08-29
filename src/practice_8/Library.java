@@ -1,10 +1,8 @@
 package practice_8;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,8 +12,13 @@ import java.util.stream.Collectors;
  */
 public class Library implements Serializable{
     private static final String FILENAME_REGEX = ".+\\.lib";
-    private LibraryUser user;
-    transient private ObservableList<Book> books = FXCollections.observableArrayList();
+
+    public User getUser() {
+        return user;
+    }
+
+    private User user;
+    transient private List<Book> books;
 
     transient private File libraryFile;
 //    transient private boolean isFileLoaded = false;
@@ -89,7 +92,7 @@ public class Library implements Serializable{
         serializableBookList = books.toArray(serializableBookList);
     }
 
-    public ObservableList<Book> getBooks(){
+    public List<Book> getBooks(){
         return books;
     }
 

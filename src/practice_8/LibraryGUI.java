@@ -5,14 +5,11 @@ import javafx.application.Application;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -21,165 +18,177 @@ import java.util.List;
  * Created by swanta on 17.07.16.
  */
 public class LibraryGUI extends Application {
-    private SimpleObjectProperty<Library> currentLibrary = new SimpleObjectProperty<Library>(){{
-        addListener( (observable, oldLibrary, newLibrary) -> {
-            if (oldLibrary != null) {
-                Library.saveLibrary(oldLibrary);
-            }
-        });
-    }};
-    private ObservableList<Library> libraries;
-    private boolean firstRun; //TODO: hello message at first run
-    private TabPane root = new TabPane();
-
-    private BookTabs bookTab = new BookTabs(currentLibrary.getBooks(), root.getTabs());
-
-    private SimpleObjectProperty<Book> selectedBook =
-            new SimpleObjectProperty<>();// link to tableView in tableView constructor section
-
+//    private SimpleObjectProperty<List<Book>> currentBookList;
+    private ObservableList<ObservableBook> currentObservableBooks = FXCollections.observableArrayList();
+    private SimpleObjectProperty<ObservableBook> lastOpenedBook = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<ObservableBook> selectedObservableBook = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<Library> currentLibrary = new SimpleObjectProperty<>();
+    private ObservableList<Library> libraries = FXCollections.observableArrayList();
+    private SimpleObjectProperty<User> currentUser = new SimpleObjectProperty<>();
+    private SimpleBooleanProperty unselectedBook = new SimpleBooleanProperty();
     @NotNull
-    private SimpleObjectProperty<Book> currentBook = new SimpleObjectProperty<Book>(){{
-        selectedBook.addListener((observable, oldValue, newValue) -> {if (newValue != null) setValue(newValue);});}};
-    private SimpleBooleanProperty unselectedBook = new SimpleBooleanProperty(){{
-        selectedBook.addListener((observable, oldValue, newValue) -> setValue(newValue == null));}};
+    private SimpleObjectProperty<ObservableBook> currentBook = new SimpleObjectProperty<>();
+    private InfoTab infoTab = new InfoTab();
+    private BookListTab bookListTab = new BookListTab();;
+    private TabPane rootTabPane = new TabPane();
+
+    private BookTabs bookTabManager = new BookTabs(rootTabPane.getTabs());
+
+
+    private boolean firstRun; //TODO: hello message at first run
 
     @Override
     public void stop() throws Exception {
-        currentLibrary.saveBooksToFile();
+        Library.saveLibrary(currentLibrary.getValue());
         super.stop();
+    }
+
+    {
+        currentLibrary.set(Library.createNonSerializableLibrary());
+
+// link List<ObservableBook> to tableView
+        bookListTab.tableView.setItems(currentObservableBooks);
+
+// link currentUser and currentBooks to currentLibrary
+        currentLibrary.addListener((observable, oldLibrary, newLibrary) -> {
+            if (oldLibrary != null) {
+                Library.saveLibrary(oldLibrary);
+            }
+            if (newLibrary != null) {
+                currentUser.set(newLibrary.getUser());
+                //                    currentBookList.set(newLibrary.getObservableBooks());
+
+            //TODO: this shouldn't edit library books
+            //            currentObservableBooks.removeListener();
+                currentObservableBooks.setAll(ObservableBook.getObservableBooks(newLibrary.getBooks()));
+            //            currentObservableBooks.addListener();
+
+                ;
+            }
+        });
+
+// link userBox
+        currentUser.addListener((observable, oldValue, newValue) -> {
+            infoTab.userInfoPane.setUser(newValue);
+        });
+
+
+        //        currentBookList.addListener((observable, oldValue, newValue) -> {
+        //
+        //        });
+
+// link library books to observablebooks
+        currentObservableBooks.addListener(new ListChangeListener<ObservableBook>() {
+            @Override
+            public void onChanged(Change<? extends ObservableBook> c) {
+                List<Book> target = currentLibrary.getValue().getBooks();
+                while (c.next()) {
+                    if (c.wasAdded()) {
+                        for (ObservableBook observableBook : c.getAddedSubList()) {
+                            target.add(observableBook.getBook());
+                        }
+                    } else if (c.wasRemoved()) {
+                        for (ObservableBook observableBook : c.getRemoved()) {
+                            target.remove(observableBook.getBook());
+                        }
+                    }
+                }
+            }
+        });
+
+// set addBookBtn action
+        bookListTab.tableAddButton
+                .setOnAction((ActionEvent e) -> {
+                    if (!(
+                            bookListTab.addAuthorField.getText().isEmpty() ||
+                                    bookListTab.addPagesField.getText().isEmpty() ||
+                                    bookListTab.addTitleField.getText().isEmpty() ||
+                                    bookListTab.addSubjectField.getText().isEmpty())) {
+                        currentObservableBooks.add(new ObservableBook(
+                                bookListTab.addTitleField.getText(),
+                                bookListTab.addAuthorField.getText(),
+                                bookListTab.addSubjectField.getText(),
+                                Integer.parseInt(bookListTab.addPagesField.getText())));
+                        bookListTab.addAuthorField.clear();
+                        bookListTab.addPagesField.clear();
+                        bookListTab.addTitleField.clear();
+                        bookListTab.addSubjectField.clear();
+                    }
+                });
+
+// set rmBookBtn action
+        bookListTab.tableRemoveButton
+            .setOnAction((ActionEvent e) ->
+                    currentObservableBooks.remove(selectedObservableBook.getValue()));
+
+// link currentLibrary to choiceBox
+        infoTab.libraryInfoPane.libraryChoice.getSelectionModel().selectedItemProperty()
+                .addListener((observable, oldValue, newValue) ->
+                        currentLibrary.setValue(newValue));
+
+// set openBookTab action
+        bookListTab.tableView
+                .setOnMouseClicked(event -> {
+                    ObservableBook target = (ObservableBook) bookListTab.tableView.getSelectionModel().selectedItemProperty().getValue();
+                    System.out.println("tableView click");
+                    if (target !=null) {
+                        if (event.getClickCount() == 2) {
+
+                            System.out.println("open new tab");
+                            bookTabManager.add(target);
+                        }
+                        selectedObservableBook.set(target);
+                    }
+                    else {
+                        System.out.println("tableView unselect");
+                    }
+                });
+
+// link "-" button to selectedObservableBook
+        selectedObservableBook.addListener((observable, oldValue, newValue) ->
+                bookListTab.tableRemoveButton.setDisable(newValue == null));
+
+// link bookListTab name to user
+        currentUser.addListener((observable, oldUser, newUser) -> {
+            bookListTab.setText(newUser.getName()); });
+
+// link bookTabManager to rootTabs (close tabs of deleted books)
+        currentObservableBooks.addListener(
+                new ListChangeListener<ObservableBook>() {
+                    @Override
+                    public void onChanged(Change<? extends ObservableBook> c) {
+                        while (c.next()) {
+                            List<ObservableBook> removedBooks = (List<ObservableBook>) c.getRemoved();
+                            if (c.wasRemoved()) {
+                                bookTabManager.removeAll(removedBooks);
+                            }
+                        }
+                    }
+                });
+
+        rootTabPane.getTabs().addAll(bookListTab, infoTab);
+        rootTabPane.setMinSize(300, 500);
     }
 
     @Override
     public void init() throws Exception {
-        List<Library> libraries = Library.getSerializedLibraries();
-        this.libraries = FXCollections.observableList(libraries);
-        firstRun = libraries.isEmpty();
-        if (firstRun) {
-            currentLibrary = Library.createNonSerializableLibrary();
-        }
-        else {
-            libraryChoice.setItems(this.libraries);
-            currentLibrary = libraries.get(0);
-            libraryChoice.setValue(currentLibrary);
-        }
+
+//        if (firstRun) {
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        Label tableTitle = new Label("MyBooks") {{
-            setFont(new Font(18));
-        }};
 
-        TableColumn titleColumn = new TableColumn("Title") {{
-            setMinWidth(200);
-            setCellValueFactory(new PropertyValueFactory<>("Title"));
-        }};
 
-        TableColumn authorColumn = new TableColumn("Author") {{
-            setMinWidth(100);
-            setCellValueFactory(new PropertyValueFactory<>("Author"));
-        }};
-
-        TableColumn pagesColumn = new TableColumn("Pages") {{
-            setMinWidth(50);
-            setCellValueFactory(new PropertyValueFactory<>("Pages"));
-        }};
-        TableColumn subjectColumn = new TableColumn("Genre") {{
-            setMinWidth(50);
-            setCellValueFactory(new PropertyValueFactory<>("Genre"));
-        }};
-        TableView tableView = new TableView() {{
-            setMinSize(400, 300);
-            getColumns().addAll(titleColumn, authorColumn, subjectColumn, pagesColumn);
-// link List<Book> to tablView
-            setItems(currentLibrary.getBooks());
-// link tableView to SelectedBook Property
-            getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                selectedBook.setValue((Book) newValue);
-                setOnMouseClicked(event -> {
-                    System.out.println("mouse.doubleclick");
-                    if (event.getClickCount() == 2 && !unselectedBook.getValue()) {
-                        root.getSelectionModel().select(
-                                bookTab.add(currentBook.getValue()));
-                    }
-                });
-            });
-        }};
-
-        VBox tableViewBox = new VBox(10) {{
-            getChildren().addAll(tableTitle, tableView);
-//              setPadding(new Insets(10));
-        }};
-
-//        ----------- start TextFields
-        TextField addAuthorField = new TextField() {{
-            setPromptText("print author here");
-        }};
-
-        TextField addSubjectField = new TextField() {{
-            setPromptText("print subject here");
-        }};
-
-        TextField addTitleField = new TextField() {{
-            setPromptText("print title here");
-        }};
-
-        TextField addPagesField = new TextField() {{
-            setPromptText("print pages count here");
-        }};
-
-//        ------------end TextFields
-
-        Button tableAddButton = new Button("+") {{
-            setOnAction((ActionEvent e) -> {
-                if (!(
-                        addAuthorField.getText().isEmpty() ||
-                                addPagesField.getText().isEmpty() ||
-                                addTitleField.getText().isEmpty() ||
-                                addSubjectField.getText().isEmpty())) {
-                    currentLibrary.addBook(addTitleField.getText(),
-                            addAuthorField.getText(),
-                            addSubjectField.getText(),
-                            Integer.parseInt(addPagesField.getText()));
-                    addAuthorField.clear();
-                    addPagesField.clear();
-                    addTitleField.clear();
-                    addSubjectField.clear();
-                }
-            });
-        }};
-        Button tableRemoveButton = new Button("-") {{
-            setDisable(true);
-            unselectedBook.addListener((observable, oldValue, newValue) ->
-                    setDisable(newValue));
-            setOnAction((ActionEvent e) ->
-                    currentLibrary.getBooks().remove(selectedBook));
-        }};
-        HBox tableButtonsBox = new HBox(10, tableAddButton, tableRemoveButton);
-        VBox tableControlsBox = new VBox(10, addTitleField, addAuthorField, addSubjectField, addPagesField, tableButtonsBox);
-        HBox libraryTabBox = new HBox(10, tableViewBox, tableControlsBox);
-        Tab libraryTab = new Tab("MyLibrary") {{
-            setContent(libraryTabBox);
-            setClosable(false);
-        }};
-
-        Tab SPECIALtab = new UserInfoTab(currentLibrary.getBooks()) // like S.P.E.C.I.A.L in Fallout
-//            selectedBook.addListener((observable, oldValue, newValue) -> {
-//                disableProperty().setValue(newValue == null);
-//            });
-        ;
-//        root.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        root.getTabs().addAll(libraryTab, SPECIALtab);
-        root.setMinSize(300, 500);
-
-        currentLibrary.addBook("H.Potter", "J.Roulling", "fantasy", 321);
-        currentLibrary.addBook("Diving into C++", "H.Deiteil, R.Deiteil", "study", 810);
-        currentLibrary.addBook("Gun", "Aghata Christi", "detective", 524);
-        currentLibrary.getBooks().forEach(Book::setRandomStatistics);
-        primaryStage.setScene(new Scene(root));
+        currentObservableBooks.add(new ObservableBook("H.Potter", "J.Roulling", "fantasy", 321));
+        currentObservableBooks.add(new ObservableBook("Diving into C++", "H.Deiteil, R.Deiteil", "study", 810));
+        currentObservableBooks.add(new ObservableBook("Gun", "Aghata Christi", "detective", 524));
+        currentObservableBooks.forEach(ObservableBook::setRandomStatistics);
+        primaryStage.setScene(new Scene(rootTabPane));
         primaryStage.show();
 
     }
+
 }
 

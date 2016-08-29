@@ -13,12 +13,11 @@ import javafx.scene.layout.VBox;
  */
 public class UserBox extends VBox {
 
-    private ChoiceBox<Library> libraryChoice;
 
     private SimpleObjectProperty<User> user = new SimpleObjectProperty<User>() {{
         addListener((observable, oldValue, newValue) -> {
-            userName.setValue(user.getValue().getName());
-            userPhotoPath.setValue(user.getValue().getPathToPhoto());
+            userName.setValue(newValue.getName());
+            userPhotoPath.setValue(newValue.getPathToPhoto());
         });
     }};
     private SimpleStringProperty userName = new SimpleStringProperty() {{
@@ -34,31 +33,35 @@ public class UserBox extends VBox {
         });
     }};
 
-    private final Node programInfoBox = new ProgramInfoBox();
-
-    private Label labelImg = new Label("press to set name") {{
+    Label labelImg = new Label("press to set name") {{
         setGraphicTextGap(10);
+
     }};
-    private Dialog inputNewName = new TextInputDialog() {
+    Dialog inputNewName = new TextInputDialog() {
         {
             setHeaderText("Input your name");
             setOnHiding(event -> this.getEditor().getText());
         }
     };
-    private Dialog inputPhotoPath = new TextInputDialog() {
+    Dialog inputPhotoPath = new TextInputDialog() {
         {
             setHeaderText("Input path to your photo");
         }
     };
 
     {
-        getChildren().addAll(labelImg, programInfoBox);
-        libraryChoice = new ChoiceBox<Library>();
-
+        getChildren().addAll(labelImg);
+        setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                System.out.println("mouse.doubleclick");
+                inputPhotoPath.show();
+            }
+            else {
+                inputNewName.show();
+            }
+        });
     }
 
-    public UserBox() {
-    }
     public void setUser (User user) {
         setPhoto(user.getPathToPhoto());
         String userName = user.getName();
