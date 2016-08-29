@@ -6,71 +6,81 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+
+import java.io.File;
 
 /**
  * Created by swanta on 27.08.16.
  */
 public class UserBox extends VBox {
+private static final String EMPTY_NAME_PROMPT = "Press LMB to set name. RMB to set photo.";
+    private static final String EMPTY_PHOTO_PATH = "user-alt-128.png";
 
-
-    private SimpleObjectProperty<User> user = new SimpleObjectProperty<User>() {{
+    SimpleObjectProperty<User> user = new SimpleObjectProperty<User>() {{
         addListener((observable, oldValue, newValue) -> {
             userName.setValue(newValue.getName());
             userPhotoPath.setValue(newValue.getPathToPhoto());
         });
     }};
-    private SimpleStringProperty userName = new SimpleStringProperty() {{
+    SimpleStringProperty userName = new SimpleStringProperty() {{
         addListener((observable, oldValue, newValue) -> {
             user.getValue().setName(newValue);
-            labelImg.setText(newValue);
+            labelImg.setText( newValue.isEmpty()
+                ? EMPTY_NAME_PROMPT
+                : newValue);
         });
     }};
-    private SimpleStringProperty userPhotoPath = new SimpleStringProperty() {{
+    SimpleStringProperty userPhotoPath = new SimpleStringProperty() {{
         addListener((observable, oldValue, newValue) -> {
             user.getValue().setPathToPhoto(newValue);
-            setPhoto(userPhotoPath.getValue());
+            if (newValue.isEmpty() || !(new File(newValue).exists())) setPhoto(EMPTY_PHOTO_PATH);
         });
     }};
 
-    Label labelImg = new Label("press to set name") {{
+    Label labelImg = new Label(EMPTY_NAME_PROMPT) {{
         setGraphicTextGap(10);
 
     }};
     Dialog inputNewName = new TextInputDialog() {
         {
             setHeaderText("Input your name");
-            setOnHiding(event -> this.getEditor().getText());
+            setOnHiding(event -> userName.setValue(this.getEditor().getText()));
         }
     };
     Dialog inputPhotoPath = new TextInputDialog() {
         {
             setHeaderText("Input path to your photo");
+            setOnHiding(event -> System.out.println(this.getEditor().getText()));
         }
     };
 
     {
         getChildren().addAll(labelImg);
         setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                System.out.println("mouse.doubleclick");
-                inputPhotoPath.show();
-            }
-            else {
-                inputNewName.show();
+            switch (event.getButton()) {
+                case PRIMARY:
+                    inputNewName.show();
+                    break;
+                case SECONDARY:
+                    inputPhotoPath.show();
+                    break;
             }
         });
     }
 
     public void setUser (User user) {
-        setPhoto(user.getPathToPhoto());
-        String userName = user.getName();
-        labelImg.setText(userName);
+        this.user.setValue(user);
     }
     
     public void setPhoto (String filePath) {
         Image image = new Image(getClass().getResourceAsStream(filePath));
         ImageView photo = new ImageView(image);
+        System.out.println("photo: " + filePath);
+        System.out.println(photo.getX());
+        photo.setFitHeight(200);
+        photo.setFitWidth(200);
         labelImg.setGraphic(photo);
     }
 }

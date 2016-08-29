@@ -10,8 +10,10 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -44,7 +46,8 @@ public class LibraryGUI extends Application {
     }
 
     {
-        currentLibrary.set(Library.createNonSerializableLibrary());
+        currentUser = infoTab.userInfoPane.user;
+        infoTab.libraryInfoPane.libraryChoice.setItems(libraries);
 
 // link List<ObservableBook> to tableView
         bookListTab.tableView.setItems(currentObservableBooks);
@@ -68,9 +71,6 @@ public class LibraryGUI extends Application {
         });
 
 // link userBox
-        currentUser.addListener((observable, oldValue, newValue) -> {
-            infoTab.userInfoPane.setUser(newValue);
-        });
 
 
         //        currentBookList.addListener((observable, oldValue, newValue) -> {
@@ -132,7 +132,7 @@ public class LibraryGUI extends Application {
                     ObservableBook target = (ObservableBook) bookListTab.tableView.getSelectionModel().selectedItemProperty().getValue();
                     System.out.println("tableView click");
                     if (target !=null) {
-                        if (event.getClickCount() == 2) {
+                        if (event.getClickCount() == 2 || event.getButton()== MouseButton.SECONDARY) {
 
                             System.out.println("open new tab");
                             bookTabManager.add(target);
@@ -150,7 +150,7 @@ public class LibraryGUI extends Application {
 
 // link bookListTab name to user
         currentUser.addListener((observable, oldUser, newUser) -> {
-            bookListTab.setText(newUser.getName()); });
+            bookListTab.setText(newUser.getName().isEmpty() ? "My library" : newUser.getName()); });
 
 // link bookTabManager to rootTabs (close tabs of deleted books)
         currentObservableBooks.addListener(
@@ -160,6 +160,7 @@ public class LibraryGUI extends Application {
                         while (c.next()) {
                             List<ObservableBook> removedBooks = (List<ObservableBook>) c.getRemoved();
                             if (c.wasRemoved()) {
+                                System.out.println("books removed. closing tabs...");
                                 bookTabManager.removeAll(removedBooks);
                             }
                         }
@@ -178,9 +179,11 @@ public class LibraryGUI extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-
-
+        libraries.addAll(Library.getSerializedLibraries());
+        for ( Library library : libraries )
+            if (library != null) infoTab.libraryInfoPane.libraryChoice.getSelectionModel().select(library);
+        if (infoTab.libraryInfoPane.libraryChoice.getValue() == null)
+            infoTab.libraryInfoPane.libraryChoice.setItems(FXCollections.observableArrayList(Library.createNonSerializableLibrary(new File(""))));
         currentObservableBooks.add(new ObservableBook("H.Potter", "J.Roulling", "fantasy", 321));
         currentObservableBooks.add(new ObservableBook("Diving into C++", "H.Deiteil, R.Deiteil", "study", 810));
         currentObservableBooks.add(new ObservableBook("Gun", "Aghata Christi", "detective", 524));
