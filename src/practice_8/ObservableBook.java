@@ -65,53 +65,53 @@ public final class ObservableBook implements Serializable {
     private Book book = new Book();
     private SimpleIntegerProperty readPages = new SimpleIntegerProperty();
 
-    {
-        //link realSeriesData to planSeriesData & book
-        realSeriesData.addListener(new ListChangeListener<XYChart.Data<String, Number>>() {
-            @Override
-            public void onChanged(Change<? extends XYChart.Data<String, Number>> c) {
+    private final ListChangeListener<? super XYChart.Data<String, Number>> bookReadStatisticsUpdater
+            = (ListChangeListener<XYChart.Data<String, Number>>) c -> {
                 //it's easier to reset all series book of book then iterate each change
                 book.setReadStatistics(realSeriesData);
-            }
-        });
-        realSeriesData.addListener(new ListChangeListener<XYChart.Data<String, Number>>() {
-            @Override
-            public void onChanged(Change<? extends XYChart.Data<String, Number>> c) {
-                planSeriesData.setAll(realSeriesData.sorted(Book.dataComparatorOnlyDate ));
-                //  calculate 2..N-1 points
-                int numberOfPointsToCalculate = planSeriesData.size()-1;
-                //  1    is first base point
-                int startPagesNumber = planSeriesData.get(0).getYValue().intValue();
-                //  N    is last base point
-                int lastPagesNumber = planSeriesData.get(numberOfPointsToCalculate).getYValue().intValue();
-                int pagesPerDay = getPages() / numberOfPointsToCalculate;
-                XYChart.Data<String, Number> planData;
-                for (int i = 1; i < numberOfPointsToCalculate; i++) {
-                    planData = planSeriesData.get(i);
-                    planData.setYValue(pagesPerDay * i);
-                }
-                //  calculate N+1 point
-                planData = new XYChart.Data<String, Number>(
-                        NEXT_PLANNING_DATE_STRING,
-                        pagesPerDay * (numberOfPointsToCalculate + 1));
-                planSeriesData.add(planData);
+            };
 
-            }
-        });
-        realSeriesData.addListener(
-                new ListChangeListener<XYChart.Data<String, Number>>() {
-                    @Override
-                    public void onChanged(Change<? extends XYChart.Data<String, Number>> c) {
-                        if (realSeriesData.size() > 0)
-                            setReadPages(
-                                    realSeriesData.stream()
-                                            .mapToInt(data -> data.getYValue().intValue())
-                                            .max()
-                                            .getAsInt());
-                                    else
-                                        setReadPages(0);
-                    }
-                });
+    private final ListChangeListener<? super XYChart.Data<String, Number>> planSeriesDataUpdater
+            = (ListChangeListener<XYChart.Data<String, Number>>) c -> {
+        planSeriesData.setAll(realSeriesData.sorted(Book.dataComparatorOnlyDate));
+        //  calculate 2..N-1 points
+        int numberOfPointsToCalculate = planSeriesData.size() - 1;
+        //  1    is first base point
+        int startPagesNumber = planSeriesData.get(0).getYValue().intValue();
+        //  N    is last base point
+        int lastPagesNumber = planSeriesData.get(numberOfPointsToCalculate).getYValue().intValue();
+        int pagesPerDay = getPages() / numberOfPointsToCalculate;
+        XYChart.Data<String, Number> planData;
+        for (int i = 1; i < numberOfPointsToCalculate; i++) {
+            planData = planSeriesData.get(i);
+            planData.setYValue(pagesPerDay * i);
+        }
+        //  calculate N+1 point
+        planData = new XYChart.Data<String, Number>(
+                NEXT_PLANNING_DATE_STRING,
+                pagesPerDay * (numberOfPointsToCalculate + 1));
+        planSeriesData.add(planData);
+
+    };
+
+    private final ListChangeListener<? super XYChart.Data<String, Number>> readPagesUpdater
+            = (ListChangeListener<XYChart.Data<String, Number>>) c -> {
+        if (realSeriesData.size() > 0)
+            setReadPages(
+                    realSeriesData.stream()
+                            .mapToInt(data -> data.getYValue().intValue())
+                            .max()
+                            .getAsInt());
+        else
+            setReadPages(0);
+
+    };
+
+    {
+        //link realSeriesData to planSeriesData & book
+        realSeriesData.addListener(bookReadStatisticsUpdater);
+        realSeriesData.addListener(planSeriesDataUpdater);
+        realSeriesData.addListener(readPagesUpdater);
     }
 
     @Override
@@ -120,7 +120,6 @@ public final class ObservableBook implements Serializable {
     }
 
     public ObservableBook(Book book) {
-//        this(book.getTitle(), book.getAuthor(), book.getGenre(), book.getPages());
         this.book = book;
         setPropertiesFromData();
     }
@@ -247,14 +246,9 @@ public final class ObservableBook implements Serializable {
         setAuthor(book.getAuthor());
         setGenre(book.getGenre());
         setPages(book.getPages());
-    }
-    public final void writeObject(ObjectOutputStream oos) throws IOException{
-        oos.writeObject(this.book);
-    }
-
-    public final void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        book = (Book)ois.readObject();
-        setPropertiesFromData();
+//        realSeriesData.removeListener(bookReadStatisticsUpdater);
+        realSeriesData.setAll(book.getReadStatistics());
+//        realSeriesData.addListener(bookReadStatisticsUpdater);
     }
 
     public int getReadPages() {
