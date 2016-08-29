@@ -84,14 +84,6 @@ public class LibraryGUI extends Application {
             }
         });
 
-// link userBox
-
-
-        //        currentBookList.addListener((observable, oldValue, newValue) -> {
-        //
-        //        });
-
-
 // set addBookBtn action
 // 1*LMB = add new book
 // 2*RMB = add some TEST books
@@ -157,9 +149,13 @@ public class LibraryGUI extends Application {
                     ObservableBook target = (ObservableBook) bookListTab.tableView.getSelectionModel().selectedItemProperty().getValue();
                     System.out.println("tableView click");
                     if (target !=null) {
-                        if (event.getClickCount() == 2 || event.getButton()== MouseButton.SECONDARY) {
+                        boolean openTabForeground = event.getClickCount() == 2;
+                        boolean openTabBackground = event.getButton()== MouseButton.SECONDARY;
+                        if (openTabForeground || openTabBackground) {
                             System.out.println("open new tab");
-                            bookTabManager.add(target);
+                            Tab newTab = bookTabManager.add(target);
+                            if (openTabForeground)
+                                rootTabPane.getSelectionModel().select(newTab);
                         }
                         selectedObservableBook.set(target);
                     }
@@ -192,7 +188,7 @@ public class LibraryGUI extends Application {
                         }
                     }
                 });
-
+        rootTabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
         rootTabPane.getTabs().addAll(bookListTab, infoTab);
         rootTabPane.setMinSize(300, 500);
     }
