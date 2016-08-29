@@ -24,10 +24,10 @@ public class BookTab extends Tab {
     private XYChart.Series<String, Number> planSeries = new LineChart.Series<String, Number>();
     private LineChart<String, Number> quantityChart = new LineChart<String, Number>(xAxis, yAxis){{
         setMinSize(200, 200);
-        getData().addAll(actualSeries, planSeries);
+        getData().addAll(actualSeries, planSeries);//
         currentBook.addListener((observable, oldValue, newValue) -> {
-            actualSeries.setData(newValue.getSeriesData());
-            planSeries.setData(newValue.getPlanData());
+            actualSeries.setData(newValue.getRealSeriesData());
+            planSeries.setData(newValue.getPlanSeriesData());
         });
         xAxis.setLabel("Period");
         yAxis.setLabel("Quantity");

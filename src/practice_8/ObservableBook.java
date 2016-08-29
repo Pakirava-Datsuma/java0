@@ -74,30 +74,38 @@ public final class ObservableBook implements Serializable {
 
     private final ListChangeListener<? super XYChart.Data<String, Number>> planSeriesDataUpdater
             = (ListChangeListener<XYChart.Data<String, Number>>) c -> {
+        updatePlanSeriesData();
+    };
+
+    public void updatePlanSeriesData() {
+        updateReadPages();
+
         //  calculate 2..N-1 points
         int numberOfPointsToCalculate = realSeriesData.size() + 1;
         //  1    is first base point
         int startPagesNumber = realSeriesData.get(0).getYValue().intValue();
         //  N    is last base point
-        int lastPagesNumber = realSeriesData.get(numberOfPointsToCalculate - 1).getYValue().intValue();
-        int pagesPerDay = getPages() / (numberOfPointsToCalculate - 2);
-        XYChart.Data<String, Number> realData, planData;
+        int lastPagesNumber = realSeriesData.get(numberOfPointsToCalculate - 2).getYValue().intValue();
+        int pagesPerDay = getReadPages() / (numberOfPointsToCalculate - 2);
+        XYChart.Data<String, Number> planData;
         List<XYChart.Data<String, Number>> planSeries = new ArrayList<>();
         for (int i = 0; i < numberOfPointsToCalculate; i++) {
-            realData = realSeriesData.get(i);
             planData = new XYChart.Data<>();
             planData.setYValue(pagesPerDay * i);
-            planData.setXValue( i == numberOfPointsToCalculate
-                    ? NEXT_PLANNING_DATE_STRING
-                    : realData.getXValue());
+            planData.setXValue( i < numberOfPointsToCalculate - 1
+                    ? realSeriesData.get(i).getXValue()
+                    : NEXT_PLANNING_DATE_STRING);
             planSeries.add(planData);
         }
         planSeriesData.setAll(planSeries);
-
-    };
+    }
 
     private final ListChangeListener<? super XYChart.Data<String, Number>> readPagesUpdater
             = (ListChangeListener<XYChart.Data<String, Number>>) c -> {
+        updateReadPages();
+    };
+
+    private void updateReadPages() {
         if (realSeriesData.size() > 0)
             setReadPages(
                     realSeriesData.stream()
@@ -107,7 +115,7 @@ public final class ObservableBook implements Serializable {
         else
             setReadPages(0);
 
-    };
+    }
 
     {
         //link realSeriesData to planSeriesData & book
@@ -158,6 +166,7 @@ public final class ObservableBook implements Serializable {
             modifyingData = new XYChart.Data<>(Book.dateFormat.format(date), pages);
             realSeriesData.add(modifyingData);
         }
+        updatePlanSeriesData();
     }
     public String getAuthor() {
         return author.get();
@@ -208,19 +217,23 @@ public final class ObservableBook implements Serializable {
     }
 
 
-    public ObservableList<XYChart.Data<String, Number>> getSeriesData() {
+    public ObservableList<XYChart.Data<String, Number>> getRealSeriesData() {
         return realSeriesData;
+    }
+
+    public ObservableList<XYChart.Data<String, Number>> getPlanSeriesData() {
+        return planSeriesData;
     }
 
     public Book getBook() {
         return book;
     }
-
     public static List<ObservableBook> getObservableBooks(List<Book> book) {
         return book.stream()
                 .map(ObservableBook::new)
                 .collect(Collectors.toList());
     }
+
     public static List<Book> getBooks(List<ObservableBook> observableBooks) {
         List<Book> result = new ArrayList<>();
         for (ObservableBook observableBook : observableBooks) {
@@ -229,11 +242,6 @@ public final class ObservableBook implements Serializable {
         return result;
     }
 
-//    public void setData(Book book) {
-//        this.author = book.author;
-//        this.
-//        this.realSeriesData.setAll(book.getReadStatistics());
-//        this.book = book;
 //    }
 
     public static void setRandomStatistics(ObservableBook observableBook) {
@@ -250,6 +258,7 @@ public final class ObservableBook implements Serializable {
         setPages(book.getPages());
 //        realSeriesData.removeListener(bookReadStatisticsUpdater);
         realSeriesData.setAll(book.getReadStatistics());
+        updatePlanSeriesData();
 //        realSeriesData.addListener(bookReadStatisticsUpdater);
     }
 
@@ -267,10 +276,6 @@ public final class ObservableBook implements Serializable {
 
     public String getTitleAndAuthor() {
         return titleAndAuthor.getValue();
-    }
-
-    public ObservableList<XYChart.Data<String, Number>> getPlanData() {
-        return planSeriesData;
     }
 
     public SimpleStringProperty getGenreProperty() {
