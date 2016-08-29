@@ -2,7 +2,9 @@ package practice_8;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -21,14 +23,21 @@ import java.util.stream.Collectors;
  * Created by swanta on 28.08.16.
  */
 public class LibraryBox extends VBox {
-    Label libraryText = new Label("choose lib:");
-    ChoiceBox<Library> libraryChoice;
-    PieChart pie;
+    Label libraryText = new Label("choose lib:"){{
+        setAlignment(Pos.BASELINE_RIGHT);
+    }};
+    ChoiceBox<Library> libraryChoice= new ChoiceBox<Library>() {{
+        setAlignment(Pos.BASELINE_LEFT);
+    }};
+//    Button addLibrary = new Button("+"){{
+//        setOnAction();
+//    }}
+    PieChart pie = new PieChart(){{
+        setAlignment(Pos.CENTER);
+    }};
     Pane choice = new HBox();
 
     {
-        pie = new PieChart();
-        libraryChoice = new ChoiceBox<>();
         libraryChoice.setConverter(new StringConverter<Library>() {
             @Override
             public String toString(Library object) {
@@ -49,7 +58,7 @@ public class LibraryBox extends VBox {
 
     }
 
-    private void updatePie(List<ObservableBook> books) {
+    public void updatePie(List<ObservableBook> books) {
         Map<String, Integer> map = new HashMap<>();
         for (ObservableBook observableBook : books) {
             map.merge(observableBook.getGenre(), observableBook.getReadPages(), (i1, i2) -> i1 + i2);

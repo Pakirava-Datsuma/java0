@@ -2,6 +2,7 @@ package practice_8;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -41,6 +42,9 @@ private static final String EMPTY_NAME_PROMPT = "Press LMB to set name. RMB to s
 
     Label labelImg = new Label(EMPTY_NAME_PROMPT) {{
         setGraphicTextGap(10);
+        setAlignment(Pos.CENTER);
+        setGraphicTextGap(5.0);
+        setContentDisplay(ContentDisplay.BOTTOM);
 
     }};
     Dialog inputNewName = new TextInputDialog() {

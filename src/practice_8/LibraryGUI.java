@@ -39,6 +39,21 @@ public class LibraryGUI extends Application {
 
     private boolean firstRun; //TODO: hello message at first run
 
+    ListChangeListener<? super ObservableBook> booksUpdater = (ListChangeListener<ObservableBook>) c -> {
+        List<Book> target = currentLibrary.getValue().getBooks();
+        while (c.next()) {
+            if (c.wasAdded()) {
+                for (ObservableBook observableBook : c.getAddedSubList()) {
+                    target.add(observableBook.getBook());
+                    addPieUpdaterTo(observableBook);
+                }
+            } else if (c.wasRemoved()) {
+                for (ObservableBook observableBook : c.getRemoved()) {
+                    target.remove(observableBook.getBook());
+                }
+            }
+        }
+    };
     @Override
     public void stop() throws Exception {
         Library.saveLibrary(currentLibrary.getValue());
@@ -58,13 +73,12 @@ public class LibraryGUI extends Application {
                 Library.saveLibrary(oldLibrary);
             }
             if (newLibrary != null) {
+                currentObservableBooks.removeListener(booksUpdater); //booksUpd OFF
                 currentUser.set(newLibrary.getUser());
-                //                    currentBookList.set(newLibrary.getObservableBooks());
-
-            //TODO: this shouldn't edit library books
-            //            currentObservableBooks.removeListener();
                 currentObservableBooks.setAll(ObservableBook.getObservableBooks(newLibrary.getBooks()));
-            //            currentObservableBooks.addListener();
+                currentObservableBooks.addListener(booksUpdater);   //booksUpd ON
+                infoTab.libraryInfoPane.updatePie(currentObservableBooks);
+
 
                 ;
             }
@@ -77,49 +91,60 @@ public class LibraryGUI extends Application {
         //
         //        });
 
-// link library books to observablebooks
-        currentObservableBooks.addListener(new ListChangeListener<ObservableBook>() {
-            @Override
-            public void onChanged(Change<? extends ObservableBook> c) {
-                List<Book> target = currentLibrary.getValue().getBooks();
-                while (c.next()) {
-                    if (c.wasAdded()) {
-                        for (ObservableBook observableBook : c.getAddedSubList()) {
-                            target.add(observableBook.getBook());
-                        }
-                    } else if (c.wasRemoved()) {
-                        for (ObservableBook observableBook : c.getRemoved()) {
-                            target.remove(observableBook.getBook());
-                        }
-                    }
-                }
-            }
-        });
 
 // set addBookBtn action
+// 1*LMB = add new book
+// 2*RMB = add some TEST books
         bookListTab.tableAddButton
-                .setOnAction((ActionEvent e) -> {
-                    if (!(
-                            bookListTab.addAuthorField.getText().isEmpty() ||
-                                    bookListTab.addPagesField.getText().isEmpty() ||
-                                    bookListTab.addTitleField.getText().isEmpty() ||
-                                    bookListTab.addSubjectField.getText().isEmpty())) {
-                        currentObservableBooks.add(new ObservableBook(
-                                bookListTab.addTitleField.getText(),
-                                bookListTab.addAuthorField.getText(),
-                                bookListTab.addSubjectField.getText(),
-                                Integer.parseInt(bookListTab.addPagesField.getText())));
-                        bookListTab.addAuthorField.clear();
-                        bookListTab.addPagesField.clear();
-                        bookListTab.addTitleField.clear();
-                        bookListTab.addSubjectField.clear();
+                .setOnMouseClicked(event -> {
+                    switch (event.getButton()) {
+                        case PRIMARY:
+
+                            if (!(
+                                    bookListTab.addAuthorField.getText().isEmpty() ||
+                                            bookListTab.addPagesField.getText().isEmpty() ||
+                                            bookListTab.addTitleField.getText().isEmpty() ||
+                                            bookListTab.addSubjectField.getText().isEmpty())) {
+                                currentObservableBooks.add(new ObservableBook(
+                                        bookListTab.addTitleField.getText(),
+                                        bookListTab.addAuthorField.getText(),
+                                        bookListTab.addSubjectField.getText(),
+                                        Integer.parseInt(bookListTab.addPagesField.getText())));
+                                bookListTab.addAuthorField.clear();
+                                bookListTab.addPagesField.clear();
+                                bookListTab.addTitleField.clear();
+                                bookListTab.addSubjectField.clear();
+                            }
+                            break;
+                        case SECONDARY:
+                            if (event.getClickCount() == 2) {
+                                currentObservableBooks.add(new ObservableBook("H.Potter", "J.Roulling", "fantasy", 321));
+                                currentObservableBooks.add(new ObservableBook("Diving into C++", "H.Deiteil, R.Deiteil", "study", 810));
+                                currentObservableBooks.add(new ObservableBook("Gun", "Aghata Christi", "detective", 524));
+                                currentObservableBooks.forEach(ObservableBook::setRandomStatistics);
+                            }
+                            break;
                     }
                 });
 
 // set rmBookBtn action
+// 1*LMB = remove book
+// 2*RMB = remove ALL books
         bookListTab.tableRemoveButton
-            .setOnAction((ActionEvent e) ->
-                    currentObservableBooks.remove(selectedObservableBook.getValue()));
+                .setOnMouseClicked(event ->
+                {
+                    switch (event.getButton()) {
+                        case PRIMARY:
+                            currentObservableBooks.remove(selectedObservableBook.getValue());
+                            break;
+                        case SECONDARY:
+                            if (event.getClickCount() == 2)
+                                currentObservableBooks.clear();
+                            break;
+
+
+                    }
+                });
 
 // link currentLibrary to choiceBox
         infoTab.libraryInfoPane.libraryChoice.getSelectionModel().selectedItemProperty()
@@ -133,7 +158,6 @@ public class LibraryGUI extends Application {
                     System.out.println("tableView click");
                     if (target !=null) {
                         if (event.getClickCount() == 2 || event.getButton()== MouseButton.SECONDARY) {
-
                             System.out.println("open new tab");
                             bookTabManager.add(target);
                         }
@@ -150,7 +174,9 @@ public class LibraryGUI extends Application {
 
 // link bookListTab name to user
         currentUser.addListener((observable, oldUser, newUser) -> {
-            bookListTab.setText(newUser.getName().isEmpty() ? "My library" : newUser.getName()); });
+            String newFilename = newUser.getName().concat(".lib");
+            bookListTab.setText(newUser.getName().isEmpty() ? "My library.lib" : newFilename);
+            currentLibrary.getValue().libraryFile = new File(newFilename);});
 
 // link bookTabManager to rootTabs (close tabs of deleted books)
         currentObservableBooks.addListener(
@@ -171,6 +197,13 @@ public class LibraryGUI extends Application {
         rootTabPane.setMinSize(300, 500);
     }
 
+    private void addPieUpdaterTo(ObservableBook observableBook) {
+        observableBook.getReadPagesProperty().addListener((observable, oldValue, newValue) ->
+                infoTab.libraryInfoPane.updatePie(currentObservableBooks));
+        observableBook.getGenreProperty().addListener((observable, oldValue, newValue) ->
+                infoTab.libraryInfoPane.updatePie(currentObservableBooks));
+    }
+
     @Override
     public void init() throws Exception {
 
@@ -184,10 +217,7 @@ public class LibraryGUI extends Application {
             if (library != null) infoTab.libraryInfoPane.libraryChoice.getSelectionModel().select(library);
         if (infoTab.libraryInfoPane.libraryChoice.getValue() == null)
             infoTab.libraryInfoPane.libraryChoice.setItems(FXCollections.observableArrayList(Library.createNonSerializableLibrary(new File(""))));
-        currentObservableBooks.add(new ObservableBook("H.Potter", "J.Roulling", "fantasy", 321));
-        currentObservableBooks.add(new ObservableBook("Diving into C++", "H.Deiteil, R.Deiteil", "study", 810));
-        currentObservableBooks.add(new ObservableBook("Gun", "Aghata Christi", "detective", 524));
-        currentObservableBooks.forEach(ObservableBook::setRandomStatistics);
+
         primaryStage.setScene(new Scene(rootTabPane));
         primaryStage.show();
 

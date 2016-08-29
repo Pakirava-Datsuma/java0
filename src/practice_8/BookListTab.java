@@ -28,8 +28,12 @@ public class BookListTab extends javafx.scene.control.Tab {
     }};
 
     TableColumn pagesColumn = new TableColumn("Pages") {{
-        setMinWidth(50);
+        setMinWidth(25);
         setCellValueFactory(new PropertyValueFactory<>("Pages"));
+    }};
+    TableColumn readPagesColumn = new TableColumn("ReadPages") {{
+        setMinWidth(25);
+        setCellValueFactory(new PropertyValueFactory<>("ReadPages"));
     }};
     TableColumn subjectColumn = new TableColumn("Genre") {{
         setMinWidth(50);
@@ -37,7 +41,7 @@ public class BookListTab extends javafx.scene.control.Tab {
     }};
     TableView tableView = new TableView() {{
         setMinSize(400, 300);
-        getColumns().addAll(titleColumn, authorColumn, subjectColumn, pagesColumn);
+        getColumns().addAll(titleColumn, authorColumn, subjectColumn, pagesColumn, readPagesColumn);
     }};
 
     VBox tableViewBox = new VBox(10) {{

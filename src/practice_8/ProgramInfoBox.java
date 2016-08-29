@@ -1,5 +1,6 @@
 package practice_8;
 
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -12,5 +13,6 @@ public class ProgramInfoBox extends Label {
     {setText("Personal Library soft\n" +
             "create by D.V.Kuleshov\n" +
             "some nights ago...");
-    setFont(Font.font(13));}
+    setFont(Font.font(13));
+    setAlignment(Pos.CENTER);}
 }

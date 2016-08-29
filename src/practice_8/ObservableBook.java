@@ -1,5 +1,6 @@
 package practice_8;
 
+import com.sun.javafx.collections.ArrayListenerHelper;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -52,8 +53,8 @@ public final class ObservableBook implements Serializable {
     private final IntegerProperty pages = new SimpleIntegerProperty() {{addListener((observable, oldValue, newValue) -> {
         book.setPages(newValue.intValue());});}};;
 
-    public final IntegerProperty todayPagesToAdd = new SimpleIntegerProperty() {{addListener((observable, oldValue, newValue) -> {
-        book.setPages(newValue.intValue());});}};
+//    public final IntegerProperty todayPagesToAdd = new SimpleIntegerProperty() {{addListener((observable, oldValue, newValue) -> {
+//        book.setPages(newValue.intValue());});}};
     
     private ObservableList<XYChart.Data<String, Number>> realSeriesData = FXCollections.observableList(
             new ArrayList<XYChart.Data<String, Number>>());
@@ -274,5 +275,9 @@ public final class ObservableBook implements Serializable {
 
     public ObservableList<XYChart.Data<String, Number>> getPlanData() {
         return planSeriesData;
+    }
+
+    public SimpleStringProperty getGenreProperty() {
+        return genre;
     }
 }
