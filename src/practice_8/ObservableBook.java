@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -73,24 +74,25 @@ public final class ObservableBook implements Serializable {
 
     private final ListChangeListener<? super XYChart.Data<String, Number>> planSeriesDataUpdater
             = (ListChangeListener<XYChart.Data<String, Number>>) c -> {
-        planSeriesData.setAll(realSeriesData.sorted(Book.dataComparatorOnlyDate));
         //  calculate 2..N-1 points
-        int numberOfPointsToCalculate = planSeriesData.size() - 1;
+        int numberOfPointsToCalculate = realSeriesData.size() + 1;
         //  1    is first base point
-        int startPagesNumber = planSeriesData.get(0).getYValue().intValue();
+        int startPagesNumber = realSeriesData.get(0).getYValue().intValue();
         //  N    is last base point
-        int lastPagesNumber = planSeriesData.get(numberOfPointsToCalculate).getYValue().intValue();
-        int pagesPerDay = getPages() / numberOfPointsToCalculate;
-        XYChart.Data<String, Number> planData;
-        for (int i = 1; i < numberOfPointsToCalculate; i++) {
-            planData = planSeriesData.get(i);
+        int lastPagesNumber = realSeriesData.get(numberOfPointsToCalculate - 1).getYValue().intValue();
+        int pagesPerDay = getPages() / (numberOfPointsToCalculate - 2);
+        XYChart.Data<String, Number> realData, planData;
+        List<XYChart.Data<String, Number>> planSeries = new ArrayList<>();
+        for (int i = 0; i < numberOfPointsToCalculate; i++) {
+            realData = realSeriesData.get(i);
+            planData = new XYChart.Data<>();
             planData.setYValue(pagesPerDay * i);
+            planData.setXValue( i == numberOfPointsToCalculate
+                    ? NEXT_PLANNING_DATE_STRING
+                    : realData.getXValue());
+            planSeries.add(planData);
         }
-        //  calculate N+1 point
-        planData = new XYChart.Data<String, Number>(
-                NEXT_PLANNING_DATE_STRING,
-                pagesPerDay * (numberOfPointsToCalculate + 1));
-        planSeriesData.add(planData);
+        planSeriesData.setAll(planSeries);
 
     };
 

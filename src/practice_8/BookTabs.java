@@ -21,7 +21,11 @@ public class BookTabs {
     }
 
     private void remove(ObservableBook observableBook) {
-        tabs.removeIf(tab -> ((BookTab)tab).has(observableBook));
+//        try {
+            tabs.removeIf(tab -> tab.getClass().equals(BookTab.class));
+//        } catch (ClassCastException e) {
+//            System.out.println("normal tab, skip");
+//        }
     }
 
     public Tab add(ObservableBook observableBook) {
