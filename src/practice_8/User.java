@@ -1,22 +1,21 @@
 package practice_8;
 
-import javafx.scene.image.Image;
-
 import java.io.Serializable;
 
 /**
  * Created by swanta on 27.08.16.
  */
 public class User implements Serializable{
-    String Name;
-    String pathToPhoto;
+    String name = "";
+    String pathToPhoto = "";
+
 
     public String getName() {
-        return Name;
+        return name;
     }
 
     public void setName(String name) {
-        Name = name;
+        this.name = name;
     }
 
     public String getPathToPhoto() {

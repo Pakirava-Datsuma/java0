@@ -1,8 +1,7 @@
 package practice_8;
 
-import javafx.collections.FXCollections;
-
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,15 +16,15 @@ public class Library implements Serializable{
         return user;
     }
 
-    private User user;
-    transient private List<Book> books;
+    private User user = new User();
+    private List<Book> books = new ArrayList<>();
 
-    transient private File libraryFile;
+    public File libraryFile;// = new File("library.lib");
 //    transient private boolean isFileLoaded = false;
-    private Book[] serializableBookList;
+//    private Book[] serializableBookList;
 
     public static List<Library> getSerializedLibraries () {
-        File[] files = new File(".").listFiles((dir, name) -> name.matches(FILENAME_REGEX));
+        File[] files = new File("./").listFiles((dir, name) -> name.matches(FILENAME_REGEX));
 
         List<String> names = Arrays.asList(files).stream()
                 .map(File::getName)
@@ -38,20 +37,25 @@ public class Library implements Serializable{
         return libraries;
     }
 
-    private Library (){};
-//    private Library (File file){};
+//    private Library (){};
+    private Library (File file){
+        libraryFile = file;
+    };
 
-    public static Library createNonSerializableLibrary() {
-        return new Library();
+    public static Library createNonSerializableLibrary(File newFile) {
+        return new Library(newFile);
     }
     public static Library createSerializableLibrary(String filename) {
         File newFile = new File(filename);
+        Library newLibrary;
         if (!newFile.exists()) {
-            return null;
+            newLibrary = createNonSerializableLibrary(newFile);
+            newLibrary.libraryFile = newFile;
         }
         else {
-            return loadLibrary(newFile);
+            newLibrary = loadLibrary(newFile);
         }
+        return newLibrary;
     }
 
     public static Library loadLibrary(File file){
@@ -59,27 +63,28 @@ public class Library implements Serializable{
         try (FileInputStream fis = new FileInputStream(file)) {
             ObjectInputStream ois = new ObjectInputStream(fis);
             library = (Library) ois.readObject();
-            library.setSerializableBooks();
+//            library.setSerializableBooks();
         }  catch (ClassNotFoundException e) {
             //"no books were saved earlier"
-            e.printStackTrace();
+//            e.printStackTrace();
+            System.out.println("can't load library from file: " + file.getName());
             library = null;
         } catch (IOException e) {
-            //"can't access file"
-            e.printStackTrace();
+            System.out.println("can't open file: " + file.getName());
+//            e.printStackTrace();
         }
         return library;
     }
 
-    private void setSerializableBooks() {
-        books = FXCollections.observableArrayList(serializableBookList);
-    }
+//    private void setSerializableBooks() {
+//        books = FXCollections.observableArrayList(serializableBookList);
+//    }
 
     public static boolean saveLibrary(Library library) {
         File libraryFile = library.libraryFile;
         try (FileOutputStream fis = new FileOutputStream(libraryFile, false)) { //file will be overwritten
             ObjectOutputStream ois = new ObjectOutputStream(fis);
-            library.getSerializableBooks();
+//            library.getSerializableBooks();
             ois.writeObject(library);
             return true;
         } catch (IOException e) {
@@ -88,9 +93,9 @@ public class Library implements Serializable{
         }
     }
 
-    private void getSerializableBooks() {
-        serializableBookList = books.toArray(serializableBookList);
-    }
+//    private void getSerializableBooks() {
+//        serializableBookList = books.toArray(serializableBookList);
+//    }
 
     public List<Book> getBooks(){
         return books;
